@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#0B0F1A">
+    <title>Power Hub — Preparazione Atletica</title>
+
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" type="image/svg+xml" href="icon.svg">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <meta name="application-name" content="Power Hub">
+    <meta name="apple-mobile-web-app-title" content="Power Hub">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="format-detection" content="telephone=no">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        base:    '#0B0F1A',
+                        surface: '#121826',
+                        elevated:'#1A2030',
+                        border:  '#2A3348',
+                        accent:   { DEFAULT: '#A3E635', dark: '#65A30D', soft: 'rgba(163,230,53,0.12)' },
+                        warn:    '#FBBF24',
+                        danger:  '#F87171',
+                        ink:      { 100: '#F1F5F9', 200: '#CBD5E1', 300: '#94A3B8', 400: '#64748B', 500: '#475569' }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'ui-monospace', 'monospace']
+                    },
+                    boxShadow: {
+                        'glow-accent': '0 0 0 1px rgba(163,230,53,0.4), 0 8px 24px -8px rgba(163,230,53,0.25)'
+                    }
+                }
+            }
+        };
+    </script>
+
+    <style>
+        html, body { background-color: #0B0F1A; }
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            color: #F1F5F9;
+            -webkit-font-smoothing: antialiased;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        /* hide scrollbars on tab bar */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Subtle ambient gradient on header */
+        .ambient-bg {
+            background:
+              radial-gradient(800px 300px at 0% 0%, rgba(163,230,53,0.08), transparent 60%),
+              radial-gradient(600px 300px at 100% 0%, rgba(99,102,241,0.07), transparent 60%),
+              #0B0F1A;
+        }
+
+        /* Card base */
+        .card {
+            background: #121826;
+            border: 1px solid #2A3348;
+            border-radius: 1rem;
+        }
+        .card-elevated {
+            background: linear-gradient(180deg, #1A2030 0%, #141A28 100%);
+            border: 1px solid #2A3348;
+            border-radius: 1rem;
+        }
+
+        /* Tab indicator */
+        .tab-btn {
+            position: relative;
+            transition: color 200ms ease;
+        }
+        .tab-btn[aria-selected="true"] { color: #A3E635; }
+        .tab-btn[aria-selected="true"]::after {
+            content: '';
+            position: absolute;
+            left: 12px; right: 12px; bottom: -1px;
+            height: 2px;
+            border-radius: 2px;
+            background: #A3E635;
+            box-shadow: 0 0 12px rgba(163,230,53,0.6);
+        }
+
+        /* Animations */
+        .fade-in { animation: fadeIn 0.35s ease both; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+        .expand-in { animation: expandIn 0.3s ease both; }
+        @keyframes expandIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Timer progress */
+        .timer-track {
+            background: #2A3348;
+            border-radius: 999px;
+            overflow: hidden;
+            height: 6px;
+        }
+        .timer-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #A3E635, #FBBF24);
+            width: 0%;
+            transition: width 1s linear;
+        }
+
+        /* Native-feel input */
+        input[type="number"] {
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        /* Tap feedback for buttons */
+        .pressable { transition: transform 120ms ease, background-color 200ms ease, border-color 200ms ease; }
+        .pressable:active { transform: scale(0.97); }
+
+        /* Chart container */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 320px;
+        }
+        @media (min-width: 768px) {
+            .chart-container { height: 380px; }
+        }
+
+        /* Pulse on accent */
+        @keyframes accentPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(163,230,53,0.5); }
+            50%      { box-shadow: 0 0 0 8px rgba(163,230,53,0); }
+        }
+        .ready-pulse { animation: accentPulse 1.2s ease-out 2; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- ======================== HEADER ======================== -->
+    <header class="ambient-bg border-b border-border sticky top-0 z-30 backdrop-blur-md/0">
+        <div class="px-4 pt-[max(env(safe-area-inset-top),0.75rem)] pb-3 max-w-3xl mx-auto">
+            <div class="flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3 min-w-0">
+                    <div class="w-10 h-10 rounded-xl bg-accent-soft border border-accent/30 flex items-center justify-center flex-shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#A3E635" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>
+                    </div>
+                    <div class="min-w-0">
+                        <h1 id="header-program-name" class="text-base font-bold leading-tight truncate">Power Hub</h1>
+                        <p id="header-dates" class="text-[11px] text-ink-400 font-mono leading-tight truncate"></p>
+                    </div>
+                </div>
+                <button id="btn-archive" onclick="switchView('archivio')" aria-label="Archivio schede"
+                    class="pressable w-10 h-10 rounded-xl border border-border bg-elevated/60 flex items-center justify-center text-ink-200 hover:text-accent hover:border-accent/40">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><rect x="3" y="3" width="18" height="5" rx="1"/><path d="M5 8v11a2 2 0 002 2h10a2 2 0 002-2V8"/><path d="M10 12h4"/></svg>
+                </button>
+            </div>
+
+            <!-- Archive read-only banner -->
+            <div id="archive-banner" class="hidden mt-3 rounded-xl border border-warn/30 bg-warn/10 text-warn text-xs px-3 py-2 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 flex-shrink-0"><path d="M12 9v4M12 17h.01"/><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+                <span class="flex-1 leading-snug">Stai consultando una scheda archiviata in sola lettura.</span>
+                <button onclick="loadProgram(currentActiveProgramId); switchView('overview');" class="font-semibold underline decoration-warn/50 underline-offset-2 hover:text-warn flex-shrink-0">Torna ad oggi</button>
+            </div>
+        </div>
+
+        <!-- Tab Navigation -->
+        <nav class="border-t border-border/60">
+            <div class="max-w-3xl mx-auto px-2 flex overflow-x-auto no-scrollbar" role="tablist" id="tabbar">
+                <button onclick="switchView('overview')" id="nav-overview" role="tab" class="tab-btn flex-shrink-0 px-3 py-3 text-sm font-semibold text-ink-300 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>
+                    Panoramica
+                </button>
+                <button onclick="switchView('giorno1')" id="nav-giorno1" role="tab" class="tab-btn flex-shrink-0 px-3 py-3 text-sm font-semibold text-ink-300">Giorno 1</button>
+                <button onclick="switchView('giorno2')" id="nav-giorno2" role="tab" class="tab-btn flex-shrink-0 px-3 py-3 text-sm font-semibold text-ink-300">Giorno 2</button>
+                <button onclick="switchView('giorno3')" id="nav-giorno3" role="tab" class="tab-btn flex-shrink-0 px-3 py-3 text-sm font-semibold text-ink-300">Giorno 3</button>
+                <button onclick="switchView('archivio')" id="nav-archivio" role="tab" class="tab-btn flex-shrink-0 px-3 py-3 text-sm font-semibold text-ink-300 ml-auto flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><rect x="3" y="3" width="18" height="5" rx="1"/><path d="M5 8v11a2 2 0 002 2h10a2 2 0 002-2V8"/><path d="M10 12h4"/></svg>
+                    Archivio
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- ======================== MAIN ======================== -->
+    <main id="main-content" class="flex-grow w-full max-w-3xl mx-auto px-4 py-6"></main>
+
+    <!-- ======================== FOOTER ======================== -->
+    <footer class="border-t border-border mt-auto">
+        <div class="max-w-3xl mx-auto px-4 py-6 text-center text-xs text-ink-400 leading-relaxed">
+            <p>Trasforma la forza in potenza, senza compromettere le articolazioni.</p>
+            <p class="mt-1 text-ink-500">Se un movimento provoca dolore (specie alla spalla), fermati e analizza la tecnica.</p>
+        </div>
+    </footer>
+
+    <!-- ======================== APP LOGIC ======================== -->
+    <script>
+        // ----- ICONS (Heroicons-style outline) -----
+        const Icon = {
+            chevron: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><polyline points="6 9 12 15 18 9"/></svg>',
+            calendar: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+            target: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>',
+            flame: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M14.5 14.5C14.5 16.5 13 18 12 18s-2.5-1.5-2.5-3.5c0-1.5 1-2.5 1-2.5S9 11 9 9.5C9 7.5 12 5 12 5s3 2.5 3 4.5c0 1.5-1.5 2.5-1.5 2.5s1 1 1 2.5z"/><path d="M12 22a8 8 0 008-8c0-4-3-6-3-10 0 0-3 2-5 6-2-2-3-4-3-4s-5 4-5 8a8 8 0 008 8z"/></svg>',
+            play: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><polygon points="6 4 20 12 6 20 6 4" fill="currentColor"/></svg>',
+            clock: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+            scale: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M3 7h18M6 7l-3 6h6l-3-6zm12 0l-3 6h6l-3-6zM12 4v16M8 20h8"/></svg>',
+            info: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>',
+            bolt: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>',
+            stop: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>',
+            timer: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><line x1="10" y1="2" x2="14" y2="2"/><line x1="12" y1="14" x2="15" y2="11"/><circle cx="12" cy="14" r="8"/></svg>',
+            check: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><polyline points="20 6 9 17 4 12"/></svg>',
+            shield: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+            rocket: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M5 13l-2 2v4h4l2-2"/><path d="M14 4l6 6L9 21l-6-6L14 4z"/><circle cx="15" cy="9" r="1.5"/></svg>',
+            hourglass: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M6 2h12M6 22h12M6 2v4a6 6 0 0012 0V2M6 22v-4a6 6 0 0112 0v4"/></svg>'
+        };
+
+        // Map rule keys to icons (replaces emoji from data)
+        const ruleIconMap = {
+            intent:  Icon.rocket,
+            nofail:  Icon.shield,
+            rest:    Icon.hourglass,
+            eccentric: Icon.clock,
+            recovery:  Icon.shield
+        };
+
+        // ----- DATA -----
+        const appData = {
+            programs: [
+                {
+                    id: "fase_2",
+                    name: "Fase 2 — Esplosività & Transfer",
+                    startDate: "15 Apr 2026",
+                    endDate: "30 Mag 2026",
+                    isCurrent: true,
+                    frequency: "3x / settimana",
+                    duration: "70-80 min",
+                    goals: [
+                        "Aumentare il salto verticale di almeno 4 cm.",
+                        "Eseguire i Push Press con tecnica fluida (transfer muro a rete).",
+                        "Azzerare i dolori in fase di massima elevazione del braccio."
+                    ],
+                    overview: {
+                        intro: "Passaggio da una logica estetica (Bodybuilding) a una logica prestazionale (Beach Volley). Tre pilastri: intento esplosivo, freschezza nervosa, recupero rigoroso.",
+                        rules: [
+                            { key: "intent", title: "Intento di Movimento", desc: "La fase concentrica deve essere alla massima velocità possibile per reclutare le fibre rapide. Le ripetizioni non sono mai lente." },
+                            { key: "nofail", title: "Niente Cedimento", desc: "Mai esaurimento muscolare. Se hai 5 reps, usa un carico da 7-8. Il sistema nervoso deve restare fresco per la potenza." },
+                            { key: "rest",   title: "Recupero Rigoroso", desc: "I 2-3 minuti di pausa servono a ricaricare l'ATP. Non cerchi pump: stai ricaricando il motore per un altro salto esplosivo." }
+                        ]
+                    },
+                    workouts: {
+                        giorno1: {
+                            title: "Salto & Spinta",
+                            subtitle: "Focus salto verticale e spinta sicura",
+                            intro: "Basi della potenza verticale + varianti di spinta orizzontale che salvaguardano cuffia dei rotatori e tendine bicipitale.",
+                            warmup: ["Dislocazioni con elastico per le spalle (3x15)", "Aperture a libro a terra per mobilità toracica (2x10 per lato)"],
+                            exercises: [
+                                { id: "g1_e1", name: "Box Jump", sets: 4, reps: "4", rest: 120, note: "Cerca la massima altezza, scendi camminando — non saltando indietro — per proteggere il tendine d'Achille.", videoLink: "https://www.youtube.com/results?search_query=box+jump+tutorial+ita+corretto" },
+                                { id: "g1_e2", name: "Squat (Back o Front)", sets: 4, reps: "5", rest: 150, note: "Discesa controllata (2 sec), risalita esplosiva al 100%.", videoLink: "https://www.youtube.com/results?search_query=squat+bilanciere+esecuzione+corretta" },
+                                { id: "g1_e3", name: "Landmine Press a 1 braccio", sets: 3, reps: "6 / braccio", rest: 90, note: "Ottimo per la cuffia. L'angolo diagonale simula la spinta del muro. Aiutati con una leggera spinta delle gambe.", videoLink: "https://www.youtube.com/results?search_query=landmine+press+unilaterale+tutorial" },
+                                { id: "g1_e4", name: "Rematore con Manubrio", sets: 3, reps: "8 / braccio", rest: 90, note: "Scapole attive, non strattonare. Stabilizza l'omero.", videoLink: "https://www.youtube.com/results?search_query=rematore+manubrio+panca+esecuzione" }
+                            ]
+                        },
+                        giorno2: {
+                            title: "Catena & Core",
+                            subtitle: "Catena posteriore e core rotazionale",
+                            intro: "Glutei e femorali (motore della spinta sulla sabbia profonda) + core come trasmettitore di forza per la frustata della schiacciata.",
+                            warmup: ["Salto con la corda leggero (3 min)", "Plank laterale (2x30\" per lato)"],
+                            exercises: [
+                                { id: "g2_e1", name: "Broad Jumps", sets: 4, reps: "4", rest: 120, note: "Salto in lungo da fermo. Usa l'oscillazione delle braccia. Atterraggio morbido ammortizzando con le ginocchia.", videoLink: "https://www.youtube.com/results?search_query=broad+jump+tutorial" },
+                                { id: "g2_e2", name: "Stacco da terra (Trap Bar o Romeno)", sets: 4, reps: "5", rest: 150, note: "Motore del salto: massima contrazione dei glutei in chiusura. Schiena perfettamente neutra.", videoLink: "https://www.youtube.com/results?search_query=stacco+da+terra+esecuzione+corretta" },
+                                { id: "g2_e3", name: "Push Press (bilanciere)", sets: 4, reps: "4", rest: 120, note: "Evoluzione del Military: leggero piegamento di gambe per 'lanciare' il bilanciere in alto. Riduce lo stress sulla spalla.", videoLink: "https://www.youtube.com/results?search_query=push+press+bilanciere+tutorial" },
+                                { id: "g2_e4", name: "Slam Palla Medica", sets: 4, reps: "6", rest: 90, note: "Tutto l'addome scaglia la palla a terra. Non solo braccia.", videoLink: "https://www.youtube.com/results?search_query=medicine+ball+slam+tutorial" }
+                            ]
+                        },
+                        giorno3: {
+                            title: "Contrasto",
+                            subtitle: "Trasferimento, contrasto e salute spalle",
+                            intro: "Contrast Training per ingannare il sistema nervoso + esercizi specifici per stabilità scapolare e prevenzione infiammazioni.",
+                            warmup: ["Affondi a corpo libero (2x10)", "Circonduzioni ampie delle braccia (avanti/indietro)"],
+                            exercises: [
+                                { id: "g3_e1", name: "Complesso Bulgaro (Contrast)", sets: 3, reps: "4 pesanti + 4 salti", rest: 120, note: "4 Affondi Bulgari pesanti → molla i pesi → subito 4 Jump Split Squat a corpo libero. Poi recupera.", videoLink: "https://www.youtube.com/results?search_query=affondi+bulgari+esecuzione+corretta" },
+                                { id: "g3_e2", name: "Panca Piana Esplosiva", sets: 4, reps: "4", rest: 120, note: "Carico medio (60% max). Discesa normale, spinta alla massima velocità senza staccare le scapole.", videoLink: "https://www.youtube.com/results?search_query=panca+piana+esplosiva+dynamic+effort" },
+                                { id: "g3_e3", name: "Face Pull al cavo", sets: 3, reps: "12-15", rest: 60, note: "Movimento lento e controllato. Cura postura e cuffia: extraruota a fine movimento.", videoLink: "https://www.youtube.com/results?search_query=face+pull+cavo+tutorial+spalle" },
+                                { id: "g3_e4", name: "Pallof Press", sets: 3, reps: "10 / lato", rest: 60, note: "Core antirotazionale per proteggere la colonna in volo e nelle torsioni.", videoLink: "https://www.youtube.com/results?search_query=pallof+press+tutorial+core" }
+                            ]
+                        }
+                    }
+                },
+                {
+                    id: "fase_1_storico",
+                    name: "Fase 1 — Adattamento & Cura Articolare",
+                    startDate: "1 Mar 2026",
+                    endDate: "14 Apr 2026",
+                    isCurrent: false,
+                    frequency: "3x / settimana",
+                    duration: "60 min",
+                    goals: [
+                        "Disinfiammare il capolungo del bicipite.",
+                        "Condizionare i tendini prima della fase di salto.",
+                        "Sbloccare la mobilità scapolare."
+                    ],
+                    overview: {
+                        intro: "Ciclo introduttivo. Obiettivo: preparare il telaio al carico delle fasi successive. Molti esercizi isometrici e di tenuta.",
+                        rules: [
+                            { key: "eccentric", title: "Controllo Eccentrico", desc: "Ogni rep aveva una fase di discesa lenta per rinforzare i tendini." },
+                            { key: "recovery",  title: "Cura dell'Infiammazione", desc: "Stop totale a panca stretta e pectoral fly per permettere ai tessuti di guarire." }
+                        ]
+                    },
+                    workouts: {
+                        giorno1: {
+                            title: "Total Body Base",
+                            subtitle: "Adattamento con carichi leggeri",
+                            intro: "Sessione di adattamento.",
+                            warmup: ["Mobilità generale"],
+                            exercises: [
+                                { id: "f1_g1_e1", name: "Squat Isometrico a muro", sets: 3, reps: "45 sec", rest: 60, note: "Senza carico, focus sui tendini.", videoLink: "#" },
+                                { id: "f1_g1_e2", name: "Piegamenti facilitati", sets: 3, reps: "10", rest: 60, note: "Ginocchia a terra, focus scapole.", videoLink: "#" }
+                            ]
+                        }
+                    }
+                }
+            ]
+        };
+
+        // ----- STATE -----
+        let currentChart = null;
+        let activeTimers = {};
+        const currentActiveProgramId = appData.programs.find(p => p.isCurrent).id;
+        let viewingProgram = appData.programs.find(p => p.isCurrent);
+        let currentView = 'overview';
+
+        // ----- PROGRAM LOAD -----
+        function loadProgram(programId) {
+            viewingProgram = appData.programs.find(p => p.id === programId);
+
+            document.getElementById('header-program-name').textContent = viewingProgram.name;
+            document.getElementById('header-dates').textContent = `${viewingProgram.startDate} — ${viewingProgram.endDate}`;
+
+            const banner = document.getElementById('archive-banner');
+            const isHistorical = viewingProgram.id !== currentActiveProgramId;
+            banner.classList.toggle('hidden', !isHistorical);
+        }
+
+        // ----- VIEW SWITCH -----
+        function switchView(viewId) {
+            currentView = viewId;
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.setAttribute('aria-selected', 'false'));
+            const activeBtn = document.getElementById(`nav-${viewId}`);
+            if (activeBtn) {
+                activeBtn.setAttribute('aria-selected', 'true');
+                activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            }
+
+            Object.values(activeTimers).forEach(clearInterval);
+            activeTimers = {};
+
+            const main = document.getElementById('main-content');
+            main.innerHTML = '';
+
+            if (viewId === 'archivio')        renderArchive(main);
+            else if (viewId === 'overview')   renderOverview(main);
+            else                              renderWorkout(viewId, main);
+
+            window.scrollTo({ top: 0, behavior: 'instant' });
+        }
+
+        // ----- RENDER: ARCHIVE -----
+        function renderArchive(container) {
+            const items = appData.programs.map(prog => {
+                const active = prog.isCurrent;
+                const badge = active
+                    ? `<span class="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-accent-soft text-accent border border-accent/30">Attivo</span>`
+                    : `<span class="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-elevated text-ink-300 border border-border">Completato</span>`;
+                return `
+                    <button onclick="loadProgram('${prog.id}'); switchView('overview');"
+                        class="pressable text-left w-full card p-4 flex flex-col gap-3 hover:border-accent/50 ${active ? 'border-accent/40' : ''}">
+                        <div class="flex items-start justify-between gap-3">
+                            <h3 class="text-base font-bold text-ink-100 leading-tight">${prog.name}</h3>
+                            ${badge}
+                        </div>
+                        <div class="flex items-center gap-2 text-xs text-ink-300 font-mono">
+                            ${Icon.calendar}
+                            <span>${prog.startDate} — ${prog.endDate}</span>
+                        </div>
+                        <p class="text-sm text-ink-200 leading-snug">
+                            <span class="text-ink-400">Obiettivo:</span> ${prog.goals[0]}
+                        </p>
+                    </button>
+                `;
+            }).join('');
+
+            container.innerHTML = `
+                <section class="fade-in space-y-5">
+                    <div>
+                        <h2 class="text-xl font-bold text-ink-100">Archivio Schede</h2>
+                        <p class="text-sm text-ink-400 mt-1">Lo storico delle tue programmazioni. Tocca una scheda per esplorarla.</p>
+                    </div>
+                    <div class="space-y-3">${items}</div>
+                </section>
+            `;
+        }
+
+        // ----- RENDER: OVERVIEW -----
+        function renderOverview(container) {
+            const data = viewingProgram.overview;
+            const isHistorical = viewingProgram.id !== currentActiveProgramId;
+
+            const rulesHtml = data.rules.map(rule => {
+                const ico = ruleIconMap[rule.key] || Icon.bolt;
+                return `
+                    <div class="card p-4 flex gap-3 items-start">
+                        <div class="w-10 h-10 rounded-xl bg-accent-soft border border-accent/30 text-accent flex items-center justify-center flex-shrink-0">
+                            ${ico}
+                        </div>
+                        <div class="min-w-0">
+                            <h4 class="font-bold text-ink-100 text-sm">${rule.title}</h4>
+                            <p class="text-sm text-ink-300 leading-relaxed mt-1">${rule.desc}</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            const goalsHtml = viewingProgram.goals.map(g => `
+                <li class="flex gap-2 text-sm text-ink-200 leading-relaxed">
+                    <span class="text-accent flex-shrink-0 mt-0.5">${Icon.check}</span>
+                    <span>${g}</span>
+                </li>
+            `).join('');
+
+            container.innerHTML = `
+                <section class="fade-in space-y-5">
+
+                    <!-- Hero -->
+                    <div class="card-elevated p-5">
+                        <div class="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-accent mb-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-accent"></span>
+                            Programma in corso
+                        </div>
+                        <h2 class="text-xl font-bold text-ink-100 leading-tight">${viewingProgram.name}</h2>
+                        <p class="text-sm text-ink-300 leading-relaxed mt-3">${data.intro}</p>
+
+                        <div class="flex flex-wrap gap-2 mt-4">
+                            <span class="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-lg bg-elevated border border-border text-ink-200 font-medium">
+                                ${Icon.calendar}<span>${viewingProgram.frequency}</span>
+                            </span>
+                            <span class="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-lg bg-elevated border border-border text-ink-200 font-medium">
+                                ${Icon.clock}<span>${viewingProgram.duration}</span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Goals -->
+                    <div class="card p-5">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="text-accent">${Icon.target}</span>
+                            <h3 class="text-base font-bold text-ink-100">Obiettivi del ciclo</h3>
+                        </div>
+                        <ul class="space-y-2">${goalsHtml}</ul>
+                    </div>
+
+                    <!-- Rules -->
+                    <div class="space-y-3">
+                        <h3 class="text-base font-bold text-ink-100 px-1">Principi del ciclo</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">${rulesHtml}</div>
+                    </div>
+
+                    <!-- Chart -->
+                    ${!isHistorical ? `
+                        <div class="card p-5">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-accent">${Icon.bolt}</span>
+                                <h3 class="text-base font-bold text-ink-100">Analisi del paradigma</h3>
+                            </div>
+                            <p class="text-xs text-ink-400 mb-4">Confronto fisiologico tra il vecchio approccio e la preparazione atletica.</p>
+                            <div class="chart-container"><canvas id="paradigmChart"></canvas></div>
+                        </div>
+                    ` : `
+                        <div class="card p-6 text-center text-sm text-ink-400 italic">
+                            Grafico di analisi disponibile solo per il ciclo attivo.
+                        </div>
+                    `}
+                </section>
+            `;
+
+            if (!isHistorical) initChart();
+        }
+
+        // ----- RENDER: WORKOUT -----
+        function renderWorkout(dayId, container) {
+            const data = viewingProgram.workouts[dayId];
+            if (!data) {
+                container.innerHTML = `
+                    <div class="fade-in card p-8 text-center text-ink-400">
+                        Giorno di allenamento non previsto in questa scheda archiviata.
+                    </div>`;
+                return;
+            }
+
+            const isReadOnly = viewingProgram.id !== currentActiveProgramId;
+
+            const warmupHtml = data.warmup.map(item => `
+                <li class="flex gap-2 items-start text-sm text-ink-200">
+                    <span class="w-1 h-1 mt-2 rounded-full bg-warn flex-shrink-0"></span>
+                    <span class="leading-relaxed">${item}</span>
+                </li>
+            `).join('');
+
+            const exercisesHtml = data.exercises.map((ex, i) => {
+                const storageKey = `beachVolleyApp_${viewingProgram.id}_${dayId}_${ex.id}`;
+                const savedLoad = localStorage.getItem(storageKey) || '';
+
+                return `
+                    <article class="card overflow-hidden">
+                        <button class="w-full text-left p-4 pressable" onclick="toggleDetails('${ex.id}')" aria-expanded="false" aria-controls="details-${ex.id}">
+                            <div class="flex items-start gap-3">
+                                <div class="w-9 h-9 rounded-lg bg-accent-soft border border-accent/30 text-accent font-bold flex items-center justify-center flex-shrink-0 font-mono text-sm">
+                                    ${String(i + 1).padStart(2, '0')}
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <h4 class="text-base font-bold text-ink-100 leading-tight">${ex.name}</h4>
+                                    <div class="flex flex-wrap gap-1.5 mt-2">
+                                        <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-elevated text-ink-200 border border-border">${ex.sets} × ${ex.reps}</span>
+                                        <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-elevated text-accent border border-accent/20 inline-flex items-center gap-1">${Icon.timer}${ex.rest}s</span>
+                                    </div>
+                                </div>
+                                <span id="toggle-icon-${ex.id}" class="text-ink-400 transition-transform duration-200 mt-1 flex-shrink-0">${Icon.chevron}</span>
+                            </div>
+                        </button>
+
+                        <div id="details-${ex.id}" class="hidden border-t border-border bg-base/40 px-4 py-4 space-y-4">
+                            <!-- Note -->
+                            <div class="flex gap-2 items-start">
+                                <span class="text-warn mt-0.5 flex-shrink-0">${Icon.info}</span>
+                                <p class="text-sm text-ink-200 leading-relaxed">${ex.note}</p>
+                            </div>
+
+                            <!-- Video -->
+                            <a href="${ex.videoLink}" target="_blank" rel="noopener noreferrer"
+                               class="pressable inline-flex items-center justify-center gap-2 w-full sm:w-auto bg-elevated hover:bg-base border border-border hover:border-danger/40 text-ink-100 hover:text-danger px-4 py-2.5 rounded-xl font-semibold text-sm">
+                                <span class="text-danger">${Icon.play}</span>
+                                Tutorial su YouTube
+                            </a>
+
+                            <!-- Load -->
+                            <div class="card-elevated p-3 flex items-center justify-between gap-3">
+                                <div class="min-w-0">
+                                    <div class="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-ink-400">
+                                        ${Icon.scale}<span>Carico</span>
+                                    </div>
+                                    <p class="text-[11px] text-ink-500 mt-0.5 leading-tight">${isReadOnly ? 'Storico registrato' : 'Tieni traccia dei progressi'}</p>
+                                </div>
+                                <div class="flex items-stretch gap-1.5 flex-shrink-0">
+                                    ${!isReadOnly ? `<button onclick="adjustLoad('${ex.id}', -2.5)" class="pressable w-9 h-11 rounded-lg bg-elevated border border-border text-ink-200 hover:text-accent hover:border-accent/40 font-bold text-lg leading-none">−</button>` : ''}
+                                    <input type="number" inputmode="decimal" step="0.5" id="load-${ex.id}"
+                                           value="${savedLoad}" ${isReadOnly ? 'disabled' : ''}
+                                           onchange="saveLoad('${viewingProgram.id}', '${dayId}', '${ex.id}', this.value)"
+                                           placeholder="—"
+                                           class="w-20 h-11 text-center font-mono font-bold text-base bg-base border border-border rounded-lg text-accent placeholder:text-ink-500 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent disabled:opacity-60 disabled:text-ink-300">
+                                    ${!isReadOnly ? `<button onclick="adjustLoad('${ex.id}', 2.5)" class="pressable w-9 h-11 rounded-lg bg-elevated border border-border text-ink-200 hover:text-accent hover:border-accent/40 font-bold text-lg leading-none">+</button>` : ''}
+                                    <span class="self-center text-xs text-ink-400 font-semibold ml-1">kg</span>
+                                </div>
+                            </div>
+
+                            <!-- Timer -->
+                            ${!isReadOnly ? `
+                                <div class="card-elevated p-3">
+                                    <div class="flex items-center justify-between gap-3">
+                                        <div class="min-w-0">
+                                            <div class="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-ink-400">
+                                                ${Icon.clock}<span>Recupero</span>
+                                            </div>
+                                            <p id="timer-display-${ex.id}" class="font-mono text-2xl font-bold text-ink-100 mt-0.5 leading-none">${formatTime(ex.rest)}</p>
+                                        </div>
+                                        <button id="btn-timer-${ex.id}" onclick="startTimer('${ex.id}', ${ex.rest})"
+                                                class="pressable inline-flex items-center gap-2 bg-accent hover:bg-accent-dark text-base font-bold text-sm px-4 h-11 rounded-xl flex-shrink-0">
+                                            <span>${Icon.bolt}</span>Avvia
+                                        </button>
+                                    </div>
+                                    <div class="timer-track mt-3 hidden" id="bar-container-${ex.id}">
+                                        <div class="timer-fill" id="bar-fill-${ex.id}"></div>
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </article>
+                `;
+            }).join('');
+
+            container.innerHTML = `
+                <section class="fade-in space-y-5">
+
+                    <!-- Day Hero -->
+                    <div class="card-elevated p-5">
+                        <div class="text-[11px] font-semibold uppercase tracking-wider text-accent">${dayId.replace('giorno', 'Giorno ')}</div>
+                        <h2 class="text-2xl font-extrabold text-ink-100 leading-tight mt-1">${data.title}</h2>
+                        <p class="text-sm text-ink-300 mt-1">${data.subtitle}</p>
+                        <p class="text-sm text-ink-300 leading-relaxed mt-3 pt-3 border-t border-border">${data.intro}</p>
+                    </div>
+
+                    <!-- Warmup -->
+                    <div class="card p-4">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-warn">${Icon.flame}</span>
+                            <h3 class="text-sm font-bold text-ink-100">Riscaldamento <span class="text-ink-400 font-medium">· 5–10 min</span></h3>
+                        </div>
+                        <ul class="space-y-1.5 pl-1">${warmupHtml}</ul>
+                    </div>
+
+                    <!-- Exercises -->
+                    <div class="space-y-3">
+                        <h3 class="text-sm font-bold uppercase tracking-wider text-ink-400 px-1">Esercizi</h3>
+                        ${exercisesHtml}
+                    </div>
+                </section>
+            `;
+        }
+
+        // ----- INTERACTIONS -----
+        window.saveLoad = function(progId, dayId, exId, value) {
+            localStorage.setItem(`beachVolleyApp_${progId}_${dayId}_${exId}`, value);
+        };
+
+        window.adjustLoad = function(exId, delta) {
+            const input = document.getElementById(`load-${exId}`);
+            if (!input || input.disabled) return;
+            const current = parseFloat(input.value) || 0;
+            const next = Math.max(0, current + delta);
+            input.value = Number.isInteger(next) ? next : next.toFixed(1).replace(/\.0$/, '');
+            input.dispatchEvent(new Event('change'));
+        };
+
+        window.toggleDetails = function(exId) {
+            const details = document.getElementById(`details-${exId}`);
+            const icon = document.getElementById(`toggle-icon-${exId}`);
+            const btn = icon?.closest('button');
+
+            if (details.classList.contains('hidden')) {
+                details.classList.remove('hidden');
+                details.classList.add('expand-in');
+                icon.style.transform = 'rotate(180deg)';
+                btn?.setAttribute('aria-expanded', 'true');
+            } else {
+                details.classList.add('hidden');
+                details.classList.remove('expand-in');
+                icon.style.transform = 'rotate(0deg)';
+                btn?.setAttribute('aria-expanded', 'false');
+            }
+        };
+
+        function formatTime(seconds) {
+            const m = Math.floor(seconds / 60);
+            const s = seconds % 60;
+            return `${m}:${s < 10 ? '0' : ''}${s}`;
+        }
+
+        window.startTimer = function(exId, totalSeconds) {
+            if (activeTimers[exId]) clearInterval(activeTimers[exId]);
+
+            let timeLeft = totalSeconds;
+            const display = document.getElementById(`timer-display-${exId}`);
+            const btn = document.getElementById(`btn-timer-${exId}`);
+            const barContainer = document.getElementById(`bar-container-${exId}`);
+            const barFill = document.getElementById(`bar-fill-${exId}`);
+
+            btn.innerHTML = `${Icon.stop}Ferma`;
+            btn.classList.remove('bg-accent', 'hover:bg-accent-dark', 'text-base');
+            btn.classList.add('bg-danger', 'hover:bg-red-600', 'text-base');
+            btn.onclick = () => stopTimer(exId, totalSeconds);
+
+            barContainer.classList.remove('hidden');
+            barFill.style.transition = 'none';
+            barFill.style.width = '0%';
+            void barFill.offsetWidth;
+            barFill.style.transition = 'width 1s linear';
+
+            display.classList.remove('text-accent', 'ready-pulse');
+            display.classList.add('text-ink-100');
+            display.textContent = formatTime(timeLeft);
+
+            activeTimers[exId] = setInterval(() => {
+                timeLeft--;
+                display.textContent = formatTime(timeLeft);
+                const pct = ((totalSeconds - timeLeft) / totalSeconds) * 100;
+                barFill.style.width = `${pct}%`;
+
+                if (timeLeft <= 0) {
+                    clearInterval(activeTimers[exId]);
+                    delete activeTimers[exId];
+                    display.textContent = "PRONTO";
+                    display.classList.remove('text-ink-100');
+                    display.classList.add('text-accent', 'ready-pulse');
+                    if (navigator.vibrate) navigator.vibrate([100, 60, 100, 60, 200]);
+                    setTimeout(() => resetTimerUI(exId, totalSeconds, true), 1500);
+                }
+            }, 1000);
+        };
+
+        function stopTimer(exId, originalRest) {
+            if (activeTimers[exId]) {
+                clearInterval(activeTimers[exId]);
+                delete activeTimers[exId];
+            }
+            resetTimerUI(exId, originalRest, false);
+        }
+
+        function resetTimerUI(exId, originalRest, keepReady) {
+            const display = document.getElementById(`timer-display-${exId}`);
+            const btn = document.getElementById(`btn-timer-${exId}`);
+            const barContainer = document.getElementById(`bar-container-${exId}`);
+
+            if (!keepReady) {
+                display.textContent = formatTime(originalRest);
+                display.classList.remove('text-accent', 'ready-pulse');
+                display.classList.add('text-ink-100');
+            }
+
+            btn.innerHTML = `${Icon.bolt}Avvia`;
+            btn.classList.remove('bg-danger', 'hover:bg-red-600');
+            btn.classList.add('bg-accent', 'hover:bg-accent-dark', 'text-base');
+            btn.onclick = () => startTimer(exId, originalRest);
+
+            setTimeout(() => barContainer?.classList.add('hidden'), 800);
+        }
+
+        // ----- CHART -----
+        function initChart() {
+            const ctx = document.getElementById('paradigmChart');
+            if (!ctx) return;
+            if (currentChart) currentChart.destroy();
+
+            currentChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Forza Max', 'Ipertrofia', 'Stress Spalla', 'Esplosività', 'Velocità/Salto', 'Salute Articolare'],
+                    datasets: [
+                        {
+                            label: 'Vecchia (Bodybuilding)',
+                            data: [7, 9, 8, 3, 2, 4],
+                            backgroundColor: 'rgba(248, 113, 113, 0.15)',
+                            borderColor: 'rgba(248, 113, 113, 0.9)',
+                            pointBackgroundColor: '#F87171',
+                            pointBorderColor: '#0B0F1A',
+                            pointBorderWidth: 2,
+                            borderWidth: 2
+                        },
+                        {
+                            label: 'Nuova (Athletic Power)',
+                            data: [8, 4, 3, 9, 9, 8],
+                            backgroundColor: 'rgba(163, 230, 53, 0.18)',
+                            borderColor: 'rgba(163, 230, 53, 1)',
+                            pointBackgroundColor: '#A3E635',
+                            pointBorderColor: '#0B0F1A',
+                            pointBorderWidth: 2,
+                            borderWidth: 2
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(255,255,255,0.08)' },
+                            grid:       { color: 'rgba(255,255,255,0.08)' },
+                            pointLabels: {
+                                font: { size: 11, family: "'Inter', sans-serif", weight: '600' },
+                                color: '#94A3B8'
+                            },
+                            ticks: { display: false, min: 0, max: 10 }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 16,
+                                color: '#CBD5E1',
+                                font: { family: "'Inter', sans-serif", size: 12, weight: '500' },
+                                boxWidth: 14, boxHeight: 14, usePointStyle: true
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: '#1A2030',
+                            borderColor: '#2A3348',
+                            borderWidth: 1,
+                            titleColor: '#F1F5F9',
+                            bodyColor: '#CBD5E1',
+                            padding: 12,
+                            callbacks: {
+                                label: (c) => ` ${c.dataset.label}: ${c.formattedValue}/10`
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ----- INIT -----
+        window.onload = () => {
+            loadProgram(currentActiveProgramId);
+            switchView('overview');
+        };
+
+        // ----- PWA: Service Worker registration -----
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .catch((err) => console.warn('Service Worker non registrato:', err));
+            });
+        }
+    </script>
+</body>
+</html>

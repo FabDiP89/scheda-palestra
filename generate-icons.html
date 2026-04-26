@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<title>Genera icone PWA</title>
+<style>
+    :root { color-scheme: dark; }
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+        background: #0B0F1A;
+        color: #F1F5F9;
+        margin: 0;
+        padding: 2rem 1.25rem 4rem;
+        max-width: 640px;
+        margin-inline: auto;
+        line-height: 1.5;
+    }
+    h1 { font-size: 1.5rem; margin: 0 0 0.5rem; }
+    p { color: #94A3B8; margin: 0 0 1.5rem; }
+    .preview {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 1rem;
+        margin: 1.5rem 0 2rem;
+    }
+    .tile {
+        background: #1A2030;
+        border: 1px solid #2A3348;
+        border-radius: 16px;
+        padding: 1rem;
+        text-align: center;
+    }
+    .tile canvas {
+        width: 96px;
+        height: 96px;
+        border-radius: 18px;
+        display: block;
+        margin: 0 auto 0.75rem;
+    }
+    .tile .label { font-size: 0.8125rem; color: #CBD5E1; font-weight: 600; }
+    .tile .sub { font-size: 0.75rem; color: #64748B; margin-top: 0.25rem; }
+    button {
+        background: #A3E635;
+        color: #0B0F1A;
+        border: 0;
+        padding: 0.875rem 1rem;
+        border-radius: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        font-size: 0.9375rem;
+        font-family: inherit;
+        transition: background 200ms ease, transform 120ms ease;
+        width: 100%;
+    }
+    button:hover { background: #84CC16; }
+    button:active { transform: scale(0.97); }
+    .actions { display: grid; grid-template-columns: 1fr; gap: 0.6rem; }
+    @media (min-width: 480px) {
+        .actions { grid-template-columns: 1fr 1fr; }
+        button.full { grid-column: 1 / -1; }
+    }
+    code {
+        background: #1A2030;
+        border: 1px solid #2A3348;
+        padding: 0.15em 0.4em;
+        border-radius: 6px;
+        font-size: 0.875em;
+    }
+    .note {
+        margin-top: 2rem;
+        padding: 1rem;
+        background: #1A2030;
+        border: 1px solid #2A3348;
+        border-radius: 12px;
+        font-size: 0.875rem;
+        color: #CBD5E1;
+    }
+    .note strong { color: #A3E635; }
+</style>
+</head>
+<body>
+    <h1>Generatore icone PWA</h1>
+    <p>Premi i 4 pulsanti per scaricare le icone necessarie. Salvale tutte nella stessa cartella di <code>main.html</code>.</p>
+
+    <div class="preview" id="preview"></div>
+
+    <div class="actions">
+        <button onclick="download(192, 'icon-192.png', false)">Scarica icon-192.png</button>
+        <button onclick="download(512, 'icon-512.png', false)">Scarica icon-512.png</button>
+        <button onclick="download(180, 'apple-touch-icon.png', false)">Scarica apple-touch-icon.png</button>
+        <button class="full" onclick="download(512, 'icon-maskable.png', true)">Scarica icon-maskable.png</button>
+    </div>
+
+    <div class="note">
+        <strong>Cos'è "maskable"?</strong> Su Android l'icona viene ritagliata in forme diverse (cerchio, squircle...). La versione maskable ha un margine maggiore per evitare che il fulmine venga tagliato.
+    </div>
+
+    <script>
+        // Stesso SVG di icon.svg, parametrizzato per scala (maskable usa scala minore = più padding)
+        function svgSource(size, maskable) {
+            const scale = maskable ? 9 : 14;
+            return `
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="${size}" height="${size}">
+                    <defs>
+                        <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#1A2030"/>
+                            <stop offset="100%" stop-color="#0B0F1A"/>
+                        </linearGradient>
+                        <radialGradient id="glow" cx="50%" cy="35%" r="55%">
+                            <stop offset="0%" stop-color="#A3E635" stop-opacity="0.30"/>
+                            <stop offset="60%" stop-color="#A3E635" stop-opacity="0.05"/>
+                            <stop offset="100%" stop-color="#A3E635" stop-opacity="0"/>
+                        </radialGradient>
+                    </defs>
+                    <rect width="512" height="512" fill="url(#bg)"/>
+                    <rect width="512" height="512" fill="url(#glow)"/>
+                    <g transform="translate(256 256) scale(${scale}) translate(-12 -12)">
+                        <path d="M14 2 L4 13 L11 13 L10 22 L20 11 L13 11 L14 2 Z"
+                              fill="#A3E635" stroke="#A3E635" stroke-width="0.4" stroke-linejoin="round"/>
+                    </g>
+                </svg>
+            `;
+        }
+
+        async function renderToCanvas(size, maskable) {
+            const svg = svgSource(size, maskable);
+            const blob = new Blob([svg], { type: 'image/svg+xml' });
+            const url = URL.createObjectURL(blob);
+            try {
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                await new Promise((resolve, reject) => {
+                    img.onload = resolve;
+                    img.onerror = reject;
+                    img.src = url;
+                });
+                const canvas = document.createElement('canvas');
+                canvas.width = size;
+                canvas.height = size;
+                const ctx = canvas.getContext('2d');
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = 'high';
+                ctx.drawImage(img, 0, 0, size, size);
+                return canvas;
+            } finally {
+                URL.revokeObjectURL(url);
+            }
+        }
+
+        async function download(size, filename, maskable) {
+            const canvas = await renderToCanvas(size, maskable);
+            canvas.toBlob((blob) => {
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                setTimeout(() => URL.revokeObjectURL(a.href), 500);
+            }, 'image/png');
+        }
+
+        // Anteprima
+        (async () => {
+            const previews = [
+                { size: 192, label: 'Standard',     sub: '192 / 512',     maskable: false },
+                { size: 180, label: 'Apple Touch',  sub: '180×180',       maskable: false },
+                { size: 512, label: 'Maskable',     sub: 'safe area',     maskable: true }
+            ];
+            const container = document.getElementById('preview');
+            for (const p of previews) {
+                const canvas = await renderToCanvas(p.size, p.maskable);
+                const tile = document.createElement('div');
+                tile.className = 'tile';
+                tile.appendChild(canvas);
+                const label = document.createElement('div');
+                label.className = 'label';
+                label.textContent = p.label;
+                const sub = document.createElement('div');
+                sub.className = 'sub';
+                sub.textContent = p.sub;
+                tile.appendChild(label);
+                tile.appendChild(sub);
+                container.appendChild(tile);
+            }
+        })();
+    </script>
+</body>
+</html>
