@@ -151,6 +151,23 @@
             50%      { box-shadow: 0 0 0 8px rgba(163,230,53,0); }
         }
         .ready-pulse { animation: accentPulse 1.2s ease-out 2; }
+
+        /* Set completion state */
+        .set-complete {
+            border-color: rgba(163, 230, 53, 0.5) !important;
+            box-shadow: 0 0 0 1px rgba(163, 230, 53, 0.2), 0 4px 24px -8px rgba(163, 230, 53, 0.18);
+        }
+        .set-complete .set-badge {
+            background: rgba(163, 230, 53, 0.14) !important;
+            border-color: rgba(163, 230, 53, 0.4) !important;
+            color: #A3E635 !important;
+        }
+        .set-bump { animation: setBump 0.4s ease-out; }
+        @keyframes setBump {
+            0%   { transform: scale(1); }
+            40%  { transform: scale(1.18); }
+            100% { transform: scale(1); }
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -343,9 +360,133 @@
         // ----- STATE -----
         let currentChart = null;
         let activeTimers = {};
+        const setProgress = {};      // exId -> n. set completati (in-memory, si azzera a ricarica)
+        let audioCtx = null;         // inizializzato lazy alla prima interazione
         const currentActiveProgramId = appData.programs.find(p => p.isCurrent).id;
         let viewingProgram = appData.programs.find(p => p.isCurrent);
         let currentView = 'overview';
+
+        // ----- AUDIO -----
+        function getAudioCtx() {
+            if (!audioCtx) {
+                try {
+                    const Ctx = window.AudioContext || window.webkitAudioContext;
+                    if (Ctx) audioCtx = new Ctx();
+                } catch (e) { console.warn('Audio non disponibile:', e); }
+            }
+            if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+            return audioCtx;
+        }
+
+        function beep(freq, duration = 0.15, volume = 0.4) {
+            const ctx = getAudioCtx();
+            if (!ctx) return;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.value = freq;
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            const now = ctx.currentTime;
+            gain.gain.setValueAtTime(0, now);
+            gain.gain.linearRampToValueAtTime(volume, now + 0.012);
+            gain.gain.linearRampToValueAtTime(volume * 0.6, now + duration * 0.55);
+            gain.gain.linearRampToValueAtTime(0, now + duration);
+            osc.start(now);
+            osc.stop(now + duration + 0.04);
+        }
+        function beepWarning() { beep(660, 0.20, 0.35); }
+        function beepReady() {
+            beep(880, 0.12, 0.45);
+            setTimeout(() => beep(1100, 0.12, 0.45), 130);
+            setTimeout(() => beep(1320, 0.22, 0.45), 260);
+        }
+
+        // ----- WAKE LOCK (mantieni schermo acceso durante il timer) -----
+        let wakeLockSentinel = null;
+
+        async function acquireWakeLock() {
+            if (!('wakeLock' in navigator)) return;
+            if (wakeLockSentinel) return;
+            try {
+                wakeLockSentinel = await navigator.wakeLock.request('screen');
+                wakeLockSentinel.addEventListener('release', () => { wakeLockSentinel = null; });
+            } catch (e) {
+                console.warn('Wake Lock non acquisito:', e);
+            }
+        }
+
+        async function maybeReleaseWakeLock() {
+            // Rilascia solo se nessun timer è ancora attivo
+            if (Object.keys(activeTimers).length > 0) return;
+            if (!wakeLockSentinel) return;
+            try { await wakeLockSentinel.release(); } catch (e) {}
+            wakeLockSentinel = null;
+        }
+
+        // Riacquisisce il lock quando la pagina torna visibile (es. dopo sblocco schermo)
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible'
+                && Object.keys(activeTimers).length > 0
+                && !wakeLockSentinel) {
+                acquireWakeLock();
+            }
+        });
+
+        // ----- SET TRACKING -----
+        function getSetCount(exId) { return setProgress[exId] || 0; }
+
+        window.adjustSets = function(exId, delta, totalSets) {
+            const next = Math.max(0, Math.min(totalSets, getSetCount(exId) + delta));
+            setProgress[exId] = next;
+            updateSetUI(exId, totalSets, false);
+        };
+
+        window.closeWorkout = function(dayId) {
+            const data = viewingProgram.workouts[dayId];
+            if (!data) return;
+            const totalCompleted = data.exercises.reduce((sum, ex) => sum + getSetCount(ex.id), 0);
+            if (totalCompleted === 0) return;
+
+            const msg = `Chiudere l'allenamento di oggi?\n\n${totalCompleted} set completati verranno azzerati per la prossima sessione.`;
+            if (!confirm(msg)) return;
+
+            data.exercises.forEach(ex => { delete setProgress[ex.id]; });
+            renderWorkout(dayId, document.getElementById('main-content'));
+        };
+
+        function incrementSet(exId, totalSets) {
+            const current = getSetCount(exId);
+            if (current >= totalSets) return;
+            setProgress[exId] = current + 1;
+            updateSetUI(exId, totalSets, true);
+        }
+
+        function updateSetUI(exId, totalSets, animate) {
+            const count = getSetCount(exId);
+            const isComplete = count >= totalSets;
+
+            const badge = document.getElementById(`set-badge-${exId}`);
+            const counter = document.getElementById(`set-count-${exId}`);
+            const card = document.getElementById(`ex-card-${exId}`);
+
+            if (badge) {
+                badge.textContent = `${count}/${totalSets} set`;
+                badge.classList.toggle('text-accent', count > 0);
+                badge.classList.toggle('text-ink-200', count === 0);
+            }
+            if (counter) {
+                counter.textContent = count;
+                counter.classList.toggle('text-accent', count > 0);
+                counter.classList.toggle('text-ink-100', count === 0);
+                if (animate) {
+                    counter.classList.remove('set-bump');
+                    void counter.offsetWidth;
+                    counter.classList.add('set-bump');
+                }
+            }
+            if (card) card.classList.toggle('set-complete', isComplete);
+        }
 
         // ----- PROGRAM LOAD -----
         function loadProgram(programId) {
@@ -526,9 +667,11 @@
             const exercisesHtml = data.exercises.map((ex, i) => {
                 const storageKey = `beachVolleyApp_${viewingProgram.id}_${dayId}_${ex.id}`;
                 const savedLoad = localStorage.getItem(storageKey) || '';
+                const initialSetCount = getSetCount(ex.id);
+                const isComplete = initialSetCount >= ex.sets;
 
                 return `
-                    <article class="card overflow-hidden">
+                    <article id="ex-card-${ex.id}" class="card overflow-hidden ${isComplete ? 'set-complete' : ''}">
                         <button class="w-full text-left p-4 pressable" onclick="toggleDetails('${ex.id}')" aria-expanded="false" aria-controls="details-${ex.id}">
                             <div class="flex items-start gap-3">
                                 <div class="w-9 h-9 rounded-lg bg-accent-soft border border-accent/30 text-accent font-bold flex items-center justify-center flex-shrink-0 font-mono text-sm">
@@ -537,7 +680,8 @@
                                 <div class="flex-1 min-w-0">
                                     <h4 class="text-base font-bold text-ink-100 leading-tight">${ex.name}</h4>
                                     <div class="flex flex-wrap gap-1.5 mt-2">
-                                        <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-elevated text-ink-200 border border-border">${ex.sets} × ${ex.reps}</span>
+                                        <span id="set-badge-${ex.id}" class="set-badge text-[11px] font-mono px-2 py-0.5 rounded bg-elevated ${initialSetCount > 0 ? 'text-accent' : 'text-ink-200'} border border-border">${initialSetCount}/${ex.sets} set</span>
+                                        <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-elevated text-ink-200 border border-border">× ${ex.reps}</span>
                                         <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-elevated text-accent border border-accent/20 inline-flex items-center gap-1">${Icon.timer}${ex.rest}s</span>
                                     </div>
                                 </div>
@@ -579,9 +723,10 @@
                                 </div>
                             </div>
 
-                            <!-- Timer -->
+                            <!-- Timer + Set tracker -->
                             ${!isReadOnly ? `
                                 <div class="card-elevated p-3">
+                                    <!-- Timer row -->
                                     <div class="flex items-center justify-between gap-3">
                                         <div class="min-w-0">
                                             <div class="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-ink-400">
@@ -589,7 +734,7 @@
                                             </div>
                                             <p id="timer-display-${ex.id}" class="font-mono text-2xl font-bold text-ink-100 mt-0.5 leading-none">${formatTime(ex.rest)}</p>
                                         </div>
-                                        <button id="btn-timer-${ex.id}" onclick="startTimer('${ex.id}', ${ex.rest})"
+                                        <button id="btn-timer-${ex.id}" onclick="startTimer('${ex.id}', ${ex.rest}, ${ex.sets})"
                                                 class="pressable inline-flex items-center gap-2 bg-accent hover:bg-accent-dark text-base font-bold text-sm px-4 h-11 rounded-xl flex-shrink-0">
                                             <span>${Icon.bolt}</span>Avvia
                                         </button>
@@ -597,12 +742,42 @@
                                     <div class="timer-track mt-3 hidden" id="bar-container-${ex.id}">
                                         <div class="timer-fill" id="bar-fill-${ex.id}"></div>
                                     </div>
+
+                                    <!-- Set counter row -->
+                                    <div class="mt-3 pt-3 border-t border-border flex items-center justify-between gap-3">
+                                        <div class="min-w-0">
+                                            <div class="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-ink-400">
+                                                ${Icon.check}<span>Set completati</span>
+                                            </div>
+                                            <p class="font-mono mt-0.5 leading-none">
+                                                <span id="set-count-${ex.id}" class="text-2xl font-bold ${initialSetCount > 0 ? 'text-accent' : 'text-ink-100'} inline-block">${initialSetCount}</span>
+                                                <span class="text-base text-ink-400 font-semibold"> / ${ex.sets}</span>
+                                            </p>
+                                        </div>
+                                        <div class="flex items-stretch gap-1.5 flex-shrink-0">
+                                            <button onclick="adjustSets('${ex.id}', -1, ${ex.sets})" class="pressable w-9 h-11 rounded-lg bg-elevated border border-border text-ink-200 hover:text-accent hover:border-accent/40 font-bold text-lg leading-none">−</button>
+                                            <button onclick="adjustSets('${ex.id}', 1, ${ex.sets})" class="pressable w-9 h-11 rounded-lg bg-elevated border border-border text-ink-200 hover:text-accent hover:border-accent/40 font-bold text-lg leading-none">+</button>
+                                        </div>
+                                    </div>
                                 </div>
                             ` : ''}
                         </div>
                     </article>
                 `;
             }).join('');
+
+            // Pulsante "Chiudi allenamento" — appare solo se c'è qualche set completato
+            const totalCompleted = data.exercises.reduce((sum, ex) => sum + getSetCount(ex.id), 0);
+            const totalRequired  = data.exercises.reduce((sum, ex) => sum + ex.sets, 0);
+            const allDone = totalCompleted >= totalRequired && totalRequired > 0;
+
+            const closeButtonHtml = (!isReadOnly && totalCompleted > 0) ? `
+                <button onclick="closeWorkout('${dayId}')"
+                        class="pressable w-full inline-flex items-center justify-center gap-2 ${allDone ? 'bg-accent hover:bg-accent-dark text-base shadow-glow-accent' : 'bg-elevated hover:bg-base text-ink-100 border border-border hover:border-accent/40'} font-bold text-sm px-4 h-12 rounded-xl mt-4">
+                    <span class="${allDone ? '' : 'text-accent'}">${Icon.check}</span>
+                    ${allDone ? `Allenamento completato · Chiudi (${totalCompleted}/${totalRequired})` : `Chiudi allenamento (${totalCompleted}/${totalRequired})`}
+                </button>
+            ` : '';
 
             container.innerHTML = `
                 <section class="fade-in space-y-5">
@@ -629,6 +804,8 @@
                         <h3 class="text-sm font-bold uppercase tracking-wider text-ink-400 px-1">Esercizi</h3>
                         ${exercisesHtml}
                     </div>
+
+                    ${closeButtonHtml}
                 </section>
             `;
         }
@@ -671,10 +848,19 @@
             return `${m}:${s < 10 ? '0' : ''}${s}`;
         }
 
-        window.startTimer = function(exId, totalSeconds) {
+        window.startTimer = function(exId, totalSeconds, totalSets) {
             if (activeTimers[exId]) clearInterval(activeTimers[exId]);
 
-            let timeLeft = totalSeconds;
+            // Sblocca AudioContext durante il gesto utente (necessario su mobile)
+            getAudioCtx();
+            // Mantieni lo schermo acceso per la durata del timer
+            acquireWakeLock();
+
+            const startTime = Date.now();
+            const endTime = startTime + totalSeconds * 1000;
+            let warned = false;
+            let completed = false;
+
             const display = document.getElementById(`timer-display-${exId}`);
             const btn = document.getElementById(`btn-timer-${exId}`);
             const barContainer = document.getElementById(`bar-container-${exId}`);
@@ -683,7 +869,7 @@
             btn.innerHTML = `${Icon.stop}Ferma`;
             btn.classList.remove('bg-accent', 'hover:bg-accent-dark', 'text-base');
             btn.classList.add('bg-danger', 'hover:bg-red-600', 'text-base');
-            btn.onclick = () => stopTimer(exId, totalSeconds);
+            btn.onclick = () => stopTimer(exId, totalSeconds, totalSets);
 
             barContainer.classList.remove('hidden');
             barFill.style.transition = 'none';
@@ -693,35 +879,54 @@
 
             display.classList.remove('text-accent', 'ready-pulse');
             display.classList.add('text-ink-100');
-            display.textContent = formatTime(timeLeft);
+            display.textContent = formatTime(totalSeconds);
 
-            activeTimers[exId] = setInterval(() => {
-                timeLeft--;
+            // Tick basato su tempo assoluto: se il browser ci strozza, al risveglio
+            // il valore mostrato è comunque corretto (recupera lo "scatto").
+            function tick() {
+                const now = Date.now();
+                const timeLeft = Math.max(0, Math.ceil((endTime - now) / 1000));
+
                 display.textContent = formatTime(timeLeft);
-                const pct = ((totalSeconds - timeLeft) / totalSeconds) * 100;
+                const pct = Math.min(100, ((totalSeconds - timeLeft) / totalSeconds) * 100);
                 barFill.style.width = `${pct}%`;
 
-                if (timeLeft <= 0) {
+                // Avviso a 10s — una sola volta, solo se siamo davvero vicini al confine
+                if (!warned && timeLeft <= 10 && timeLeft > 5 && totalSeconds > 12) {
+                    warned = true;
+                    beepWarning();
+                    if (navigator.vibrate) navigator.vibrate(80);
+                }
+
+                if (!completed && timeLeft <= 0) {
+                    completed = true;
                     clearInterval(activeTimers[exId]);
                     delete activeTimers[exId];
                     display.textContent = "PRONTO";
                     display.classList.remove('text-ink-100');
                     display.classList.add('text-accent', 'ready-pulse');
+                    beepReady();
                     if (navigator.vibrate) navigator.vibrate([100, 60, 100, 60, 200]);
-                    setTimeout(() => resetTimerUI(exId, totalSeconds, true), 1500);
+                    incrementSet(exId, totalSets);
+                    maybeReleaseWakeLock();
+                    setTimeout(() => resetTimerUI(exId, totalSeconds, true, totalSets), 1500);
                 }
-            }, 1000);
+            }
+
+            tick();
+            activeTimers[exId] = setInterval(tick, 1000);
         };
 
-        function stopTimer(exId, originalRest) {
+        function stopTimer(exId, originalRest, totalSets) {
             if (activeTimers[exId]) {
                 clearInterval(activeTimers[exId]);
                 delete activeTimers[exId];
             }
-            resetTimerUI(exId, originalRest, false);
+            maybeReleaseWakeLock();
+            resetTimerUI(exId, originalRest, false, totalSets);
         }
 
-        function resetTimerUI(exId, originalRest, keepReady) {
+        function resetTimerUI(exId, originalRest, keepReady, totalSets) {
             const display = document.getElementById(`timer-display-${exId}`);
             const btn = document.getElementById(`btn-timer-${exId}`);
             const barContainer = document.getElementById(`bar-container-${exId}`);
@@ -735,7 +940,7 @@
             btn.innerHTML = `${Icon.bolt}Avvia`;
             btn.classList.remove('bg-danger', 'hover:bg-red-600');
             btn.classList.add('bg-accent', 'hover:bg-accent-dark', 'text-base');
-            btn.onclick = () => startTimer(exId, originalRest);
+            btn.onclick = () => startTimer(exId, originalRest, totalSets);
 
             setTimeout(() => barContainer?.classList.add('hidden'), 800);
         }
