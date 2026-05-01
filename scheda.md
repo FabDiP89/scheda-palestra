@@ -60,28 +60,20 @@ Sessione che pone le basi della potenza verticale e introduce varianti di spinta
 
 Cerca la massima altezza, scendi **camminando** dal cubo (non saltando all'indietro) per proteggere il tendine d'Achille.
 
-[Tutorial](https://www.youtube.com/results?search_query=box+jump+tutorial+ita+corretto)
-
 #### 2. Squat (Back o Front)
 **Serie × Reps:** 4 × 5 — **Recupero:** 150s
 
 Discesa controllata (~2 secondi), risalita esplosiva al 100%.
-
-[Tutorial](https://www.youtube.com/results?search_query=squat+bilanciere+esecuzione+corretta)
 
 #### 3. Landmine Press a 1 braccio
 **Serie × Reps:** 3 × 6 per braccio — **Recupero:** 90s
 
 Ottimo per la cuffia. L'angolo diagonale simula la spinta del muro a rete. Aiutarsi con una leggera spinta delle gambe.
 
-[Tutorial](https://www.youtube.com/results?search_query=landmine+press+unilaterale+tutorial)
-
 #### 4. Rematore con Manubrio
 **Serie × Reps:** 3 × 8 per braccio — **Recupero:** 90s
 
 Scapole attive, non strattonare con la schiena. Stabilizzare l'omero.
-
-[Tutorial](https://www.youtube.com/results?search_query=rematore+manubrio+panca+esecuzione)
 
 ---
 
@@ -103,28 +95,20 @@ Glutei e femorali (vero motore della spinta sulla sabbia profonda) e core come t
 
 Salto in lungo da fermo. Usare l'oscillazione delle braccia. Atterraggio morbido ammortizzando con le ginocchia.
 
-[Tutorial](https://www.youtube.com/results?search_query=broad+jump+tutorial)
-
 #### 2. Stacco da terra (Trap Bar o Romeno)
 **Serie × Reps:** 4 × 5 — **Recupero:** 150s
 
 Motore del salto: massima contrazione dei glutei in chiusura. Schiena perfettamente neutra.
-
-[Tutorial](https://www.youtube.com/results?search_query=stacco+da+terra+esecuzione+corretta)
 
 #### 3. Push Press (bilanciere)
 **Serie × Reps:** 4 × 4 — **Recupero:** 120s
 
 Evoluzione del Military Press: leggero piegamento delle gambe per "lanciare" il bilanciere in alto. Riduce lo stress sulla spalla isolata.
 
-[Tutorial](https://www.youtube.com/results?search_query=push+press+bilanciere+tutorial)
-
 #### 4. Slam Palla Medica
 **Serie × Reps:** 4 × 6 — **Recupero:** 90s
 
 Tutto l'addome scaglia la palla a terra con violenza. Non solo braccia.
-
-[Tutorial](https://www.youtube.com/results?search_query=medicine+ball+slam+tutorial)
 
 ---
 
@@ -146,28 +130,20 @@ Contrast Training per ingannare il sistema nervoso e includere esercizi specific
 
 Eseguire 4 Affondi Bulgari pesanti → mollare i pesi → **immediatamente** 4 Jump Split Squat a corpo libero. Recuperare solo dopo aver concluso il complesso.
 
-[Tutorial](https://www.youtube.com/results?search_query=affondi+bulgari+esecuzione+corretta)
-
 #### 2. Panca Piana Esplosiva
 **Serie × Reps:** 4 × 4 — **Recupero:** 120s
 
 Carico medio (~60% del massimale). Discesa normale, spinta alla massima velocità senza staccare le scapole (scapole addotte).
-
-[Tutorial](https://www.youtube.com/results?search_query=panca+piana+esplosiva+dynamic+effort)
 
 #### 3. Face Pull al cavo
 **Serie × Reps:** 3 × 12-15 — **Recupero:** 60s
 
 Movimento lento e controllato. L'obiettivo è curare postura e cuffia: extraruotare a fine movimento.
 
-[Tutorial](https://www.youtube.com/results?search_query=face+pull+cavo+tutorial+spalle)
-
 #### 4. Pallof Press
 **Serie × Reps:** 3 × 10 per lato — **Recupero:** 60s
 
 Core antirotazionale per proteggere la colonna in volo e durante le torsioni.
-
-[Tutorial](https://www.youtube.com/results?search_query=pallof+press+tutorial+core)
 
 ---
 
