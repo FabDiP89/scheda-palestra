@@ -27,7 +27,7 @@
             theme: {
                 extend: {
                     colors: {
-                        base:    '#0B0F1A',
+                        deep:    '#0B0F1A',
                         surface: '#121826',
                         elevated:'#1A2030',
                         border:  '#2A3348',
@@ -262,7 +262,7 @@
                     <p id="modal-tag" class="text-[10px] font-bold uppercase tracking-wider text-accent leading-tight"></p>
                     <h3 id="modal-title" class="text-base font-bold text-ink-100 leading-tight mt-0.5 truncate"></h3>
                 </div>
-                <button id="modal-close" aria-label="Chiudi" class="pressable w-9 h-9 rounded-lg bg-base/60 border border-border text-ink-200 hover:text-ink-100 flex items-center justify-center flex-shrink-0">
+                <button id="modal-close" aria-label="Chiudi" class="pressable w-9 h-9 rounded-lg bg-deep/60 border border-border text-ink-200 hover:text-ink-100 flex items-center justify-center flex-shrink-0">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
                         <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
                     </svg>
@@ -916,7 +916,7 @@
                         </div>
                         <span class="accordion-chevron text-ink-400 mt-1 flex-shrink-0">${Icon.chevron}</span>
                     </summary>
-                    <div class="px-4 pb-4 pt-1 text-sm prose-content border-t border-border bg-base/40">
+                    <div class="px-4 pb-4 pt-1 text-sm prose-content border-t border-border bg-deep/40">
                         ${p.body}
                     </div>
                 </details>
@@ -942,7 +942,7 @@
                         <h4 class="text-sm font-bold text-ink-100">${a.title}</h4>
                         <span class="accordion-chevron text-ink-400 flex-shrink-0">${Icon.chevron}</span>
                     </summary>
-                    <div class="px-4 pb-4 pt-1 prose-content border-t border-border bg-base/40">
+                    <div class="px-4 pb-4 pt-1 prose-content border-t border-border bg-deep/40">
                         ${a.body}
                     </div>
                 </details>
@@ -1110,9 +1110,9 @@
                             </div>
                         </div>
 
-                        <div id="details-${ex.id}" class="hidden border-t border-border bg-base/40 px-4 py-4 space-y-4">
+                        <div id="details-${ex.id}" class="hidden border-t border-border bg-deep/40 px-4 py-4 space-y-4">
                             <a href="${ex.videoLink}" target="_blank" rel="noopener noreferrer"
-                               class="pressable inline-flex items-center justify-center gap-2 w-full sm:w-auto bg-elevated hover:bg-base border border-border hover:border-danger/40 text-ink-100 hover:text-danger px-4 py-2.5 rounded-xl font-semibold text-sm">
+                               class="pressable inline-flex items-center justify-center gap-2 w-full sm:w-auto bg-elevated hover:bg-deep border border-border hover:border-danger/40 text-ink-100 hover:text-danger px-4 py-2.5 rounded-xl font-semibold text-sm">
                                 <span class="text-danger">${Icon.play}</span>
                                 Tutorial su YouTube
                             </a>
@@ -1132,7 +1132,7 @@
                                                value="${savedLoad}"
                                                onchange="saveLoad('${dayId}', '${ex.id}', this.value)"
                                                placeholder="—"
-                                               class="w-20 h-11 text-center font-mono font-bold text-base bg-base border border-border rounded-lg text-accent placeholder:text-ink-500 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent">
+                                               class="w-20 h-11 text-center font-mono font-bold text-base bg-deep border border-border rounded-lg text-accent placeholder:text-ink-500 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent">
                                         <button onclick="adjustLoad('${ex.id}', 2.5)" class="pressable w-9 h-11 rounded-lg bg-elevated border border-border text-ink-200 hover:text-accent hover:border-accent/40 font-bold text-lg leading-none">+</button>
                                         <span class="self-center text-xs text-ink-400 font-semibold ml-1">kg</span>
                                     </div>
@@ -1150,7 +1150,7 @@
                                             <p id="timer-display-${ex.id}" class="font-mono text-2xl font-bold text-ink-100 mt-0.5 leading-none">${formatTime(ex.rest)}</p>
                                         </div>
                                         <button id="btn-timer-${ex.id}" onclick="startTimer('${ex.id}', ${ex.rest}, ${ex.sets})"
-                                                class="pressable inline-flex items-center gap-2 bg-accent hover:bg-accent-dark text-base font-bold text-sm px-4 h-11 rounded-xl flex-shrink-0">
+                                                class="pressable inline-flex items-center gap-2 bg-accent hover:bg-accent-dark text-deep font-bold text-sm px-4 h-11 rounded-xl flex-shrink-0">
                                             <span>${Icon.bolt}</span>Avvia
                                         </button>
                                     </div>
@@ -1185,7 +1185,7 @@
 
             const closeBtn = totalCompleted > 0 ? `
                 <button onclick="closeWorkout('${dayId}')"
-                        class="pressable w-full inline-flex items-center justify-center gap-2 ${allDone ? 'bg-accent hover:bg-accent-dark text-base shadow-glow-accent' : 'bg-elevated hover:bg-base text-ink-100 border border-border hover:border-accent/40'} font-bold text-sm px-4 h-12 rounded-xl mt-4">
+                        class="pressable w-full inline-flex items-center justify-center gap-2 ${allDone ? 'bg-accent hover:bg-accent-dark text-deep shadow-glow-accent' : 'bg-elevated hover:bg-deep text-ink-100 border border-border hover:border-accent/40'} font-bold text-sm px-4 h-12 rounded-xl mt-4">
                     <span class="${allDone ? '' : 'text-accent'}">${Icon.check}</span>
                     ${allDone ? `Allenamento completato · Chiudi (${totalCompleted}/${totalRequired})` : `Chiudi allenamento (${totalCompleted}/${totalRequired})`}
                 </button>
@@ -1249,10 +1249,10 @@
                         <div class="flex items-stretch gap-2 mb-3">
                             <input type="number" inputmode="decimal" step="0.5" id="measure-input-${m.id}"
                                    placeholder="Nuovo valore"
-                                   class="flex-1 h-11 px-3 font-mono font-semibold text-sm bg-base border border-border rounded-lg text-ink-100 placeholder:text-ink-500 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent"
+                                   class="flex-1 h-11 px-3 font-mono font-semibold text-sm bg-deep border border-border rounded-lg text-ink-100 placeholder:text-ink-500 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent"
                                    onkeypress="if(event.key==='Enter') addMeasurement('${m.id}')">
                             <button onclick="addMeasurement('${m.id}')"
-                                    class="pressable inline-flex items-center justify-center gap-1.5 bg-accent hover:bg-accent-dark text-base font-bold text-sm px-4 h-11 rounded-lg flex-shrink-0">
+                                    class="pressable inline-flex items-center justify-center gap-1.5 bg-accent hover:bg-accent-dark text-deep font-bold text-sm px-4 h-11 rounded-lg flex-shrink-0">
                                 ${Icon.plus}<span>Salva</span>
                             </button>
                         </div>
@@ -1373,8 +1373,8 @@
             const barFill = document.getElementById(`bar-fill-${exId}`);
 
             btn.innerHTML = `${Icon.stop}Ferma`;
-            btn.classList.remove('bg-accent', 'hover:bg-accent-dark', 'text-base');
-            btn.classList.add('bg-danger', 'hover:bg-red-600', 'text-base');
+            btn.classList.remove('bg-accent', 'hover:bg-accent-dark');
+            btn.classList.add('bg-danger', 'hover:bg-red-600');
             btn.onclick = () => stopTimer(exId, totalSeconds, totalSets);
 
             barContainer.classList.remove('hidden');
@@ -1436,7 +1436,7 @@
             }
             btn.innerHTML = `${Icon.bolt}Avvia`;
             btn.classList.remove('bg-danger', 'hover:bg-red-600');
-            btn.classList.add('bg-accent', 'hover:bg-accent-dark', 'text-base');
+            btn.classList.add('bg-accent', 'hover:bg-accent-dark');
             btn.onclick = () => startTimer(exId, originalRest, totalSets);
             setTimeout(() => barContainer?.classList.add('hidden'), 800);
         }
