@@ -6,7 +6,6 @@
     <meta name="theme-color" content="#0B0F1A">
     <title>Power Hub — Preparazione Atletica</title>
 
-    <!-- PWA -->
     <link rel="manifest" href="manifest.webmanifest">
     <link rel="icon" type="image/svg+xml" href="icon.svg">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -22,7 +21,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
         tailwind.config = {
@@ -34,7 +32,7 @@
                         elevated:'#1A2030',
                         border:  '#2A3348',
                         accent:   { DEFAULT: '#A3E635', dark: '#65A30D', soft: 'rgba(163,230,53,0.12)' },
-                        warn:    '#FBBF24',
+                        warn:     { DEFAULT: '#FBBF24', soft: 'rgba(251,191,36,0.12)' },
                         danger:  '#F87171',
                         ink:      { 100: '#F1F5F9', 200: '#CBD5E1', 300: '#94A3B8', 400: '#64748B', 500: '#475569' }
                     },
@@ -56,22 +54,11 @@
             font-family: 'Inter', system-ui, sans-serif;
             color: #F1F5F9;
             -webkit-font-smoothing: antialiased;
-            padding-bottom: env(safe-area-inset-bottom);
         }
 
-        /* hide scrollbars on tab bar */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* Subtle ambient gradient on header */
-        .ambient-bg {
-            background:
-              radial-gradient(800px 300px at 0% 0%, rgba(163,230,53,0.08), transparent 60%),
-              radial-gradient(600px 300px at 100% 0%, rgba(99,102,241,0.07), transparent 60%),
-              #0B0F1A;
-        }
-
-        /* Card base */
         .card {
             background: #121826;
             border: 1px solid #2A3348;
@@ -83,28 +70,13 @@
             border-radius: 1rem;
         }
 
-        /* Tab indicator */
-        .tab-btn {
-            position: relative;
-            transition: color 200ms ease;
-        }
-        .tab-btn[aria-selected="true"] { color: #A3E635; }
-        .tab-btn[aria-selected="true"]::after {
-            content: '';
-            position: absolute;
-            left: 12px; right: 12px; bottom: -1px;
-            height: 2px;
-            border-radius: 2px;
-            background: #A3E635;
-            box-shadow: 0 0 12px rgba(163,230,53,0.6);
-        }
-
         /* Animations */
         .fade-in { animation: fadeIn 0.35s ease both; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-
         .expand-in { animation: expandIn 0.3s ease both; }
         @keyframes expandIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+        .slide-up { animation: slideUp 0.3s cubic-bezier(0.32, 0.72, 0, 1) both; }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 
         /* Timer progress */
         .timer-track {
@@ -120,39 +92,25 @@
             transition: width 1s linear;
         }
 
-        /* Native-feel input */
-        input[type="number"] {
+        input[type="number"], input[type="date"] {
             -moz-appearance: textfield;
             appearance: textfield;
+            color-scheme: dark;
         }
         input[type="number"]::-webkit-outer-spin-button,
         input[type="number"]::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
+            -webkit-appearance: none; margin: 0;
         }
 
-        /* Tap feedback for buttons */
-        .pressable { transition: transform 120ms ease, background-color 200ms ease, border-color 200ms ease; }
+        .pressable { transition: transform 120ms ease, background-color 200ms ease, border-color 200ms ease, color 200ms ease; }
         .pressable:active { transform: scale(0.97); }
 
-        /* Chart container */
-        .chart-container {
-            position: relative;
-            width: 100%;
-            height: 320px;
-        }
-        @media (min-width: 768px) {
-            .chart-container { height: 380px; }
-        }
-
-        /* Pulse on accent */
         @keyframes accentPulse {
             0%, 100% { box-shadow: 0 0 0 0 rgba(163,230,53,0.5); }
             50%      { box-shadow: 0 0 0 8px rgba(163,230,53,0); }
         }
         .ready-pulse { animation: accentPulse 1.2s ease-out 2; }
 
-        /* Set completion state */
         .set-complete {
             border-color: rgba(163, 230, 53, 0.5) !important;
             box-shadow: 0 0 0 1px rgba(163, 230, 53, 0.2), 0 4px 24px -8px rgba(163, 230, 53, 0.18);
@@ -168,205 +126,568 @@
             40%  { transform: scale(1.18); }
             100% { transform: scale(1); }
         }
+
+        /* Bottom nav */
+        .bottom-tab {
+            position: relative;
+            color: #64748B;
+            transition: color 200ms ease;
+            min-height: 56px;
+        }
+        .bottom-tab[aria-selected="true"] {
+            color: #A3E635;
+        }
+        .bottom-tab[aria-selected="true"]::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 50%;
+            transform: translateX(-50%);
+            width: 28px; height: 3px;
+            background: #A3E635;
+            border-radius: 0 0 3px 3px;
+            box-shadow: 0 0 12px rgba(163,230,53,0.6);
+        }
+
+        /* Modal */
+        .modal-content {
+            background: #121826;
+        }
+        @media (min-width: 640px) {
+            .modal-content { border-radius: 1.25rem; }
+        }
+        .modal-content h4 {
+            color: #F1F5F9;
+            font-weight: 700;
+            font-size: 0.875rem;
+            margin: 0 0 0.5rem;
+        }
+        .modal-content ul, .modal-content ol {
+            margin: 0 0 0.5rem;
+            padding-left: 1.25rem;
+            color: #CBD5E1;
+            font-size: 0.875rem;
+            line-height: 1.55;
+        }
+        .modal-content ol { list-style: decimal; }
+        .modal-content ul { list-style: disc; }
+        .modal-content li { margin-bottom: 0.3rem; }
+        .modal-content p {
+            color: #CBD5E1;
+            font-size: 0.875rem;
+            line-height: 1.55;
+            margin: 0 0 0.6rem;
+        }
+        .modal-content table {
+            width: 100%;
+            font-size: 0.8125rem;
+            border-collapse: collapse;
+            margin: 0.4rem 0 0.8rem;
+        }
+        .modal-content th, .modal-content td {
+            padding: 0.4rem 0.6rem;
+            border: 1px solid #2A3348;
+            text-align: left;
+            color: #CBD5E1;
+        }
+        .modal-content th {
+            background: #1A2030;
+            color: #F1F5F9;
+            font-weight: 600;
+        }
+        .modal-content blockquote {
+            border-left: 3px solid #A3E635;
+            background: rgba(163,230,53,0.06);
+            padding: 0.6rem 0.9rem;
+            margin: 0.5rem 0;
+            color: #F1F5F9;
+            font-size: 0.875rem;
+            border-radius: 0 0.5rem 0.5rem 0;
+        }
+        .modal-content code {
+            background: #1A2030;
+            padding: 0.05rem 0.35rem;
+            border-radius: 0.25rem;
+            font-size: 0.825em;
+            color: #A3E635;
+        }
+
+        /* Accordion */
+        .accordion-btn[aria-expanded="true"] .accordion-chevron { transform: rotate(180deg); }
+        .accordion-chevron { transition: transform 0.2s ease; }
+
+        /* Number tab badge */
+        .day-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 800;
+            font-size: 1.25rem;
+            line-height: 1;
+        }
+
+        /* Generic content tables (panoramica) */
+        .prose-table {
+            width: 100%;
+            font-size: 0.8125rem;
+            border-collapse: collapse;
+        }
+        .prose-table th, .prose-table td {
+            padding: 0.5rem 0.7rem;
+            border: 1px solid #2A3348;
+            text-align: left;
+            color: #CBD5E1;
+            vertical-align: top;
+        }
+        .prose-table th {
+            background: #1A2030;
+            color: #F1F5F9;
+            font-weight: 600;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .prose-table .num { text-align: right; font-variant-numeric: tabular-nums; font-family: 'JetBrains Mono', monospace; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
-    <!-- ======================== HEADER ======================== -->
-    <header class="ambient-bg border-b border-border sticky top-0 z-30 backdrop-blur-md/0">
-        <div class="px-4 pt-[max(env(safe-area-inset-top),0.75rem)] pb-3 max-w-3xl mx-auto">
-            <div class="flex items-center justify-between gap-3">
-                <div class="flex items-center gap-3 min-w-0">
-                    <div class="w-10 h-10 rounded-xl bg-accent-soft border border-accent/30 flex items-center justify-center flex-shrink-0">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#A3E635" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>
-                    </div>
-                    <div class="min-w-0">
-                        <h1 id="header-program-name" class="text-base font-bold leading-tight truncate">Power Hub</h1>
-                        <p id="header-dates" class="text-[11px] text-ink-400 font-mono leading-tight truncate"></p>
-                    </div>
+    <!-- Main content -->
+    <main id="main-content"
+          class="flex-grow w-full max-w-3xl mx-auto px-4 pt-[max(env(safe-area-inset-top),1rem)] pb-32"></main>
+
+    <!-- Modal -->
+    <div id="modal-root" class="fixed inset-0 z-50 hidden items-end sm:items-center justify-center">
+        <div id="modal-backdrop" class="fixed inset-0 bg-black/70 backdrop-blur-sm"></div>
+        <div id="modal-panel" class="modal-content slide-up relative w-full sm:max-w-lg max-h-[88dvh] border border-border rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col z-10">
+            <header class="px-5 pt-4 pb-3 border-b border-border flex items-start justify-between gap-3 flex-shrink-0 bg-elevated">
+                <div class="min-w-0">
+                    <p id="modal-tag" class="text-[10px] font-bold uppercase tracking-wider text-accent leading-tight"></p>
+                    <h3 id="modal-title" class="text-base font-bold text-ink-100 leading-tight mt-0.5 truncate"></h3>
                 </div>
-                <button id="btn-archive" onclick="switchView('archivio')" aria-label="Archivio schede"
-                    class="pressable w-10 h-10 rounded-xl border border-border bg-elevated/60 flex items-center justify-center text-ink-200 hover:text-accent hover:border-accent/40">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><rect x="3" y="3" width="18" height="5" rx="1"/><path d="M5 8v11a2 2 0 002 2h10a2 2 0 002-2V8"/><path d="M10 12h4"/></svg>
+                <button id="modal-close" aria-label="Chiudi" class="pressable w-9 h-9 rounded-lg bg-base/60 border border-border text-ink-200 hover:text-ink-100 flex items-center justify-center flex-shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+                        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
                 </button>
-            </div>
-
-            <!-- Archive read-only banner -->
-            <div id="archive-banner" class="hidden mt-3 rounded-xl border border-warn/30 bg-warn/10 text-warn text-xs px-3 py-2 flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 flex-shrink-0"><path d="M12 9v4M12 17h.01"/><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
-                <span class="flex-1 leading-snug">Stai consultando una scheda archiviata in sola lettura.</span>
-                <button onclick="loadProgram(currentActiveProgramId); switchView('overview');" class="font-semibold underline decoration-warn/50 underline-offset-2 hover:text-warn flex-shrink-0">Torna ad oggi</button>
-            </div>
+            </header>
+            <div id="modal-body" class="flex-1 overflow-y-auto px-5 py-4"></div>
         </div>
+    </div>
 
-        <!-- Tab Navigation -->
-        <nav class="border-t border-border/60">
-            <div class="max-w-3xl mx-auto px-2 flex overflow-x-auto no-scrollbar" role="tablist" id="tabbar">
-                <button onclick="switchView('overview')" id="nav-overview" role="tab" class="tab-btn flex-shrink-0 px-3 py-3 text-sm font-semibold text-ink-300 flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>
-                    Panoramica
-                </button>
-                <button onclick="switchView('giorno1')" id="nav-giorno1" role="tab" class="tab-btn flex-shrink-0 px-3 py-3 text-sm font-semibold text-ink-300">Giorno 1</button>
-                <button onclick="switchView('giorno2')" id="nav-giorno2" role="tab" class="tab-btn flex-shrink-0 px-3 py-3 text-sm font-semibold text-ink-300">Giorno 2</button>
-                <button onclick="switchView('giorno3')" id="nav-giorno3" role="tab" class="tab-btn flex-shrink-0 px-3 py-3 text-sm font-semibold text-ink-300">Giorno 3</button>
-                <button onclick="switchView('archivio')" id="nav-archivio" role="tab" class="tab-btn flex-shrink-0 px-3 py-3 text-sm font-semibold text-ink-300 ml-auto flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><rect x="3" y="3" width="18" height="5" rx="1"/><path d="M5 8v11a2 2 0 002 2h10a2 2 0 002-2V8"/><path d="M10 12h4"/></svg>
-                    Archivio
-                </button>
-            </div>
-        </nav>
-    </header>
-
-    <!-- ======================== MAIN ======================== -->
-    <main id="main-content" class="flex-grow w-full max-w-3xl mx-auto px-4 py-6"></main>
-
-    <!-- ======================== FOOTER ======================== -->
-    <footer class="border-t border-border mt-auto">
-        <div class="max-w-3xl mx-auto px-4 py-6 text-center text-xs text-ink-400 leading-relaxed">
-            <p>Trasforma la forza in potenza, senza compromettere le articolazioni.</p>
-            <p class="mt-1 text-ink-500">Se un movimento provoca dolore (specie alla spalla), fermati e analizza la tecnica.</p>
+    <!-- Bottom Nav -->
+    <nav class="fixed bottom-0 inset-x-0 z-40 bg-surface/95 backdrop-blur-md border-t border-border">
+        <div class="max-w-3xl mx-auto flex" style="padding-bottom: env(safe-area-inset-bottom)" id="tabbar">
+            <button id="tab-overview" onclick="switchView('overview')" aria-label="Panoramica" class="bottom-tab pressable flex-1 flex items-center justify-center" role="tab">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+            </button>
+            <button id="tab-day1" onclick="switchView('day1')" aria-label="Giorno 1" class="bottom-tab pressable flex-1 flex items-center justify-center" role="tab">
+                <span class="day-number">1</span>
+            </button>
+            <button id="tab-day2" onclick="switchView('day2')" aria-label="Giorno 2" class="bottom-tab pressable flex-1 flex items-center justify-center" role="tab">
+                <span class="day-number">2</span>
+            </button>
+            <button id="tab-day3" onclick="switchView('day3')" aria-label="Giorno 3" class="bottom-tab pressable flex-1 flex items-center justify-center" role="tab">
+                <span class="day-number">3</span>
+            </button>
+            <button id="tab-measurements" onclick="switchView('measurements')" aria-label="Misurazioni" class="bottom-tab pressable flex-1 flex items-center justify-center" role="tab">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+            </button>
         </div>
-    </footer>
+    </nav>
 
-    <!-- ======================== APP LOGIC ======================== -->
     <script>
-        // ----- ICONS (Heroicons-style outline) -----
+        // ============================================================
+        //  ICONS (Heroicons-style outline)
+        // ============================================================
         const Icon = {
             chevron: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><polyline points="6 9 12 15 18 9"/></svg>',
-            calendar: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+            chevronRight: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><polyline points="9 18 15 12 9 6"/></svg>',
             target: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>',
-            flame: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M14.5 14.5C14.5 16.5 13 18 12 18s-2.5-1.5-2.5-3.5c0-1.5 1-2.5 1-2.5S9 11 9 9.5C9 7.5 12 5 12 5s3 2.5 3 4.5c0 1.5-1.5 2.5-1.5 2.5s1 1 1 2.5z"/><path d="M12 22a8 8 0 008-8c0-4-3-6-3-10 0 0-3 2-5 6-2-2-3-4-3-4s-5 4-5 8a8 8 0 008 8z"/></svg>',
+            flame: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M12 22a8 8 0 008-8c0-4-3-6-3-10 0 0-3 2-5 6-2-2-3-4-3-4s-5 4-5 8a8 8 0 008 8z"/></svg>',
             play: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><polygon points="6 4 20 12 6 20 6 4" fill="currentColor"/></svg>',
             clock: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
             scale: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M3 7h18M6 7l-3 6h6l-3-6zm12 0l-3 6h6l-3-6zM12 4v16M8 20h8"/></svg>',
             info: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>',
-            bolt: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>',
-            stop: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>',
+            alert: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
             timer: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><line x1="10" y1="2" x2="14" y2="2"/><line x1="12" y1="14" x2="15" y2="11"/><circle cx="12" cy="14" r="8"/></svg>',
             check: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><polyline points="20 6 9 17 4 12"/></svg>',
-            shield: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
-            rocket: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M5 13l-2 2v4h4l2-2"/><path d="M14 4l6 6L9 21l-6-6L14 4z"/><circle cx="15" cy="9" r="1.5"/></svg>',
-            hourglass: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M6 2h12M6 22h12M6 2v4a6 6 0 0012 0V2M6 22v-4a6 6 0 0112 0v4"/></svg>'
+            stop: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>',
+            bolt: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>',
+            plus: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+            calendar: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+            trash: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>'
         };
 
-        // Map rule keys to icons (replaces emoji from data)
-        const ruleIconMap = {
-            intent:  Icon.rocket,
-            nofail:  Icon.shield,
-            rest:    Icon.hourglass,
-            eccentric: Icon.clock,
-            recovery:  Icon.shield
-        };
+        // ============================================================
+        //  PROGRAM DATA
+        // ============================================================
+        const program = {
+            id: 'fase_2_v2',
+            name: 'Fase 2 — Esplosività & Transfer',
+            version: '2.0',
+            startDate: '4 Mag 2026',
+            endDate: '14 Giu 2026',
+            frequency: '3 sessioni / settimana',
+            duration: '60-80 min',
+            sport: 'Beach Volley',
 
-        // ----- DATA -----
-        const appData = {
-            programs: [
+            goals: [
+                'Aumentare il salto verticale di almeno 4 cm.',
+                'Eseguire i Push Press con tecnica fluida, gambe-tronco-braccia coordinati.',
+                'Mantenere dolore 0/10 in elevazione e nei gesti overhead.',
+                'Migliorare il transfer su sabbia: partenze, lateralità, atterraggi, reattività.',
+                'Uscire dalle sedute fresco ma stimolato — niente pump, niente cedimento.'
+            ],
+
+            principles: [
                 {
-                    id: "fase_2",
-                    name: "Fase 2 — Esplosività & Transfer",
-                    startDate: "15 Apr 2026",
-                    endDate: "30 Mag 2026",
-                    isCurrent: true,
-                    frequency: "3x / settimana",
-                    duration: "70-80 min",
-                    goals: [
-                        "Aumentare il salto verticale di almeno 4 cm.",
-                        "Eseguire i Push Press con tecnica fluida (transfer muro a rete).",
-                        "Azzerare i dolori in fase di massima elevazione del braccio."
-                    ],
-                    overview: {
-                        intro: "Passaggio da una logica estetica (Bodybuilding) a una logica prestazionale (Beach Volley). Tre pilastri: intento esplosivo, freschezza nervosa, recupero rigoroso.",
-                        rules: [
-                            { key: "intent", title: "Intento di Movimento", desc: "La fase concentrica deve essere alla massima velocità possibile per reclutare le fibre rapide. Le ripetizioni non sono mai lente." },
-                            { key: "nofail", title: "Niente Cedimento", desc: "Mai esaurimento muscolare. Se hai 5 reps, usa un carico da 7-8. Il sistema nervoso deve restare fresco per la potenza." },
-                            { key: "rest",   title: "Recupero Rigoroso", desc: "I 2-3 minuti di pausa servono a ricaricare l'ATP. Non cerchi pump: stai ricaricando il motore per un altro salto esplosivo." }
-                        ]
-                    },
-                    workouts: {
-                        giorno1: {
-                            title: "Salto & Spinta",
-                            subtitle: "Focus salto verticale e spinta sicura",
-                            intro: "Basi della potenza verticale + varianti di spinta orizzontale che salvaguardano cuffia dei rotatori e tendine bicipitale.",
-                            warmup: ["Dislocazioni con elastico per le spalle (3x15)", "Aperture a libro a terra per mobilità toracica (2x10 per lato)"],
-                            exercises: [
-                                { id: "g1_e1", name: "Box Jump", sets: 4, reps: "4", rest: 120, note: "Cerca la massima altezza, scendi camminando — non saltando indietro — per proteggere il tendine d'Achille.", videoLink: "https://www.youtube.com/results?search_query=box+jump+tutorial+ita+corretto" },
-                                { id: "g1_e2", name: "Squat (Back o Front)", sets: 4, reps: "5", rest: 150, note: "Discesa controllata (2 sec), risalita esplosiva al 100%.", videoLink: "https://www.youtube.com/results?search_query=squat+bilanciere+esecuzione+corretta" },
-                                { id: "g1_e3", name: "Landmine Press a 1 braccio", sets: 3, reps: "6 / braccio", rest: 90, note: "Ottimo per la cuffia. L'angolo diagonale simula la spinta del muro. Aiutati con una leggera spinta delle gambe.", videoLink: "https://www.youtube.com/results?search_query=landmine+press+unilaterale+tutorial" },
-                                { id: "g1_e4", name: "Rematore con Manubrio", sets: 3, reps: "8 / braccio", rest: 90, note: "Scapole attive, non strattonare. Stabilizza l'omero.", videoLink: "https://www.youtube.com/results?search_query=rematore+manubrio+panca+esecuzione" }
-                            ]
-                        },
-                        giorno2: {
-                            title: "Catena & Core",
-                            subtitle: "Catena posteriore e core rotazionale",
-                            intro: "Glutei e femorali (motore della spinta sulla sabbia profonda) + core come trasmettitore di forza per la frustata della schiacciata.",
-                            warmup: ["Salto con la corda leggero (3 min)", "Plank laterale (2x30\" per lato)"],
-                            exercises: [
-                                { id: "g2_e1", name: "Broad Jumps", sets: 4, reps: "4", rest: 120, note: "Salto in lungo da fermo. Usa l'oscillazione delle braccia. Atterraggio morbido ammortizzando con le ginocchia.", videoLink: "https://www.youtube.com/results?search_query=broad+jump+tutorial" },
-                                { id: "g2_e2", name: "Stacco da terra (Trap Bar o Romeno)", sets: 4, reps: "5", rest: 150, note: "Motore del salto: massima contrazione dei glutei in chiusura. Schiena perfettamente neutra.", videoLink: "https://www.youtube.com/results?search_query=stacco+da+terra+esecuzione+corretta" },
-                                { id: "g2_e3", name: "Push Press (bilanciere)", sets: 4, reps: "4", rest: 120, note: "Evoluzione del Military: leggero piegamento di gambe per 'lanciare' il bilanciere in alto. Riduce lo stress sulla spalla.", videoLink: "https://www.youtube.com/results?search_query=push+press+bilanciere+tutorial" },
-                                { id: "g2_e4", name: "Slam Palla Medica", sets: 4, reps: "6", rest: 90, note: "Tutto l'addome scaglia la palla a terra. Non solo braccia.", videoLink: "https://www.youtube.com/results?search_query=medicine+ball+slam+tutorial" }
-                            ]
-                        },
-                        giorno3: {
-                            title: "Contrasto",
-                            subtitle: "Trasferimento, contrasto e salute spalle",
-                            intro: "Contrast Training per ingannare il sistema nervoso + esercizi specifici per stabilità scapolare e prevenzione infiammazioni.",
-                            warmup: ["Affondi a corpo libero (2x10)", "Circonduzioni ampie delle braccia (avanti/indietro)"],
-                            exercises: [
-                                { id: "g3_e1", name: "Complesso Bulgaro (Contrast)", sets: 3, reps: "4 pesanti + 4 salti", rest: 120, note: "4 Affondi Bulgari pesanti → molla i pesi → subito 4 Jump Split Squat a corpo libero. Poi recupera.", videoLink: "https://www.youtube.com/results?search_query=affondi+bulgari+esecuzione+corretta" },
-                                { id: "g3_e2", name: "Panca Piana Esplosiva", sets: 4, reps: "4", rest: 120, note: "Carico medio (60% max). Discesa normale, spinta alla massima velocità senza staccare le scapole.", videoLink: "https://www.youtube.com/results?search_query=panca+piana+esplosiva+dynamic+effort" },
-                                { id: "g3_e3", name: "Face Pull al cavo", sets: 3, reps: "12-15", rest: 60, note: "Movimento lento e controllato. Cura postura e cuffia: extraruota a fine movimento.", videoLink: "https://www.youtube.com/results?search_query=face+pull+cavo+tutorial+spalle" },
-                                { id: "g3_e4", name: "Pallof Press", sets: 3, reps: "10 / lato", rest: 60, note: "Core antirotazionale per proteggere la colonna in volo e nelle torsioni.", videoLink: "https://www.youtube.com/results?search_query=pallof+press+tutorial+core" }
-                            ]
-                        }
-                    }
+                    title: '1. Intento massimo',
+                    short: 'Concentrica sempre alla massima velocità possibile, in ogni esercizio chiave.',
+                    body: '<p>Vale per Squat, Push Press, Stacco/Trap Bar/RDL, Panca esplosiva, Box Jump, Broad Jump, Slam.</p><p>La velocità reale può cambiare in base al carico, ma <strong>l\'intento deve essere sempre massimo</strong>.</p>'
                 },
                 {
-                    id: "fase_1_storico",
-                    name: "Fase 1 — Adattamento & Cura Articolare",
-                    startDate: "1 Mar 2026",
-                    endDate: "14 Apr 2026",
-                    isCurrent: false,
-                    frequency: "3x / settimana",
-                    duration: "60 min",
-                    goals: [
-                        "Disinfiammare il capolungo del bicipite.",
-                        "Condizionare i tendini prima della fase di salto.",
-                        "Sbloccare la mobilità scapolare."
-                    ],
-                    overview: {
-                        intro: "Ciclo introduttivo. Obiettivo: preparare il telaio al carico delle fasi successive. Molti esercizi isometrici e di tenuta.",
-                        rules: [
-                            { key: "eccentric", title: "Controllo Eccentrico", desc: "Ogni rep aveva una fase di discesa lenta per rinforzare i tendini." },
-                            { key: "recovery",  title: "Cura dell'Infiammazione", desc: "Stop totale a panca stretta e pectoral fly per permettere ai tessuti di guarire." }
-                        ]
-                    },
-                    workouts: {
-                        giorno1: {
-                            title: "Total Body Base",
-                            subtitle: "Adattamento con carichi leggeri",
-                            intro: "Sessione di adattamento.",
-                            warmup: ["Mobilità generale"],
-                            exercises: [
-                                { id: "f1_g1_e1", name: "Squat Isometrico a muro", sets: 3, reps: "45 sec", rest: 60, note: "Senza carico, focus sui tendini.", videoLink: "#" },
-                                { id: "f1_g1_e2", name: "Piegamenti facilitati", sets: 3, reps: "10", rest: 60, note: "Ginocchia a terra, focus scapole.", videoLink: "#" }
+                    title: '2. No cedimento',
+                    short: 'RIR 2-3 sui fondamentali. Mai esaurimento muscolare.',
+                    body: '<blockquote>Se hai 5 ripetizioni in scheda, usa un carico con cui ne avresti circa 7-8 pulite.</blockquote><p>Il cedimento peggiora la qualità, aumenta la fatica residua e riduce il transfer atletico.</p>'
+                },
+                {
+                    title: '3. Recuperi pieni',
+                    short: 'I recuperi non sono tempo perso: ricostituiscono energia per la qualità delle serie.',
+                    body: '<table><thead><tr><th>Tipo di esercizio</th><th>Recupero</th></tr></thead><tbody><tr><td>Salti</td><td>90-120 s</td></tr><tr><td>Squat / Stacco / Push Press</td><td>120-180 s</td></tr><tr><td>Panca esplosiva</td><td>120 s</td></tr><tr><td>Accessori</td><td>60-90 s</td></tr></tbody></table><p>Se hai tempo, non accorciare i recuperi sui movimenti principali. Priorità qualità, non densità.</p>'
+                },
+                {
+                    title: '4. Qualità prima del volume',
+                    short: 'La serie finisce quando la velocità cala, la tecnica cambia, o senti di "sopravvivere" al gesto.',
+                    body: '<p>La serie termina quando:</p><ul><li>la velocità cala visibilmente;</li><li>la tecnica cambia;</li><li>l\'atterraggio diventa rumoroso o instabile;</li><li>la spalla compensa;</li><li>la zona lombare prende il posto di gambe e core;</li><li>senti di "sopravvivere" al gesto invece di eseguirlo.</li></ul><p>Una ripetizione in più <strong>non è automaticamente meglio</strong>.</p>'
+                },
+                {
+                    title: '5. Forza + potenza',
+                    short: '"Fresco sì. Leggero no."',
+                    body: '<p>Il ciclo allena soprattutto la capacità di esprimere forza rapidamente, ma mantiene anche uno stimolo reale di forza se Squat, Stacco/Trap Bar/RDL e Bulgari sono caricati correttamente.</p><ul><li><strong>Potenza</strong>: carichi moderati, massima velocità.</li><li><strong>Forza</strong>: carichi sub-massimali ma seri, RIR 2-3.</li><li><strong>Spalla</strong>: spinte gestibili, lavoro scapolare, controllo tecnico.</li></ul><blockquote>Fresco sì. Leggero no.</blockquote>'
+                },
+                {
+                    title: '6. Misurare, non indovinare',
+                    short: 'La sensazione non basta — la metrica decide.',
+                    body: '<p>Misuriamo: salto verticale, broad jump, tecnica del Push Press, stato della spalla, RIR e velocità percepita nei fondamentali, transfer percepito in campo.</p>'
+                }
+            ],
+
+            paradigm: [
+                ['Forza massimale',          'Media/alta',          'Alta, ma non massimale'],
+                ['Ipertrofia',               'Molto alta',          'Secondaria'],
+                ['Stress spalla',            'Alto',                'Controllato'],
+                ['Esplosività',              'Bassa',               'Molto alta'],
+                ['Velocità / salto',         'Bassa',               'Molto alta'],
+                ['Fatica percepita',         'Alta',                'Moderata'],
+                ['Recupero neurale',         'Spesso sacrificato',  'Prioritario'],
+                ['Transfer beach volley',    'Indiretto',           'Diretto']
+            ],
+
+            schedule: {
+                rule: 'Tre giorni non consecutivi. Evita due sedute consecutive.',
+                examples: [
+                    'Lunedì G1 · Mercoledì G2 · Venerdì G3',
+                    'Martedì G1 · Giovedì G2 · Sabato G3'
+                ],
+                note: 'Se hai beach volley intenso, consideralo carico atletico vero, soprattutto per salti e spalla.'
+            },
+
+            progression: [
+                ['1', 'Tecnica + baseline',  '4×5 @ RIR 3',                       '4×4 @ RIR 3',          'Volume standard',           'Prima misurazione'],
+                ['2', 'Consolidamento',      '4×5 @ RIR 2-3',                     '4×4 @ RIR 2-3',        'Volume standard',           'Piccolo aumento se tutto è veloce'],
+                ['3', 'Intensificazione',    '5×4 @ RIR 2 oppure 4×5 più carico', '5×3 o 4×4 @ RIR 2',    'Volume standard',           'Test intermedio'],
+                ['4', 'Stabilizzazione',     'Come sett. 3',                      'Come sett. 3',         'Volume standard',           'Non cercare fatica extra'],
+                ['5', 'Picco di qualità',    '5×3 @ RIR 1-2',                     '5×3 @ RIR 2',          'Invariato o leggero calo',  'Massima qualità'],
+                ['6', 'Scarico + test',      'Volume -40-50%',                    'Volume -40-50%',       'Test salto',                'Misurazione finale']
+            ],
+
+            progressionRules: {
+                when: [
+                    'la tecnica è rimasta stabile',
+                    'la velocità non è crollata',
+                    'hai rispettato il RIR',
+                    'la spalla è rimasta a 0/10 durante e dopo',
+                    'il giorno dopo non senti fatica articolare anomala'
+                ],
+                increments: [
+                    ['Squat / Stacco / Trap Bar', '+2,5 - 5 kg'],
+                    ['Push Press',                '+1 - 2,5 kg'],
+                    ['Landmine Press',            '+1 - 2 kg per lato'],
+                    ['Panca esplosiva',           'aumenta solo se la velocità resta alta']
+                ]
+            },
+
+            autoreg: [
+                {
+                    title: 'Se ti senti troppo fresco',
+                    body: '<p>Non aggiungere volume automaticamente. Prima controlla:</p><ul><li>i salti stanno migliorando?</li><li>i carichi salgono mantenendo velocità?</li><li>il Push Press è più fluido?</li><li>in campo ti senti più reattivo?</li><li>la spalla resta a 0/10?</li></ul><p>Se sì, la scheda sta facendo il suo lavoro.</p>'
+                },
+                {
+                    title: 'Se ti senti cotto',
+                    body: '<p>Taglia in questo ordine:</p><ol><li>una serie dagli accessori;</li><li>una serie dalla panca esplosiva o dagli slam;</li><li>una serie dai complessi Bulgari;</li><li>solo per ultimo, riduci i fondamentali.</li></ol><p>Non tagliare il riscaldamento. Non accorciare troppo i recuperi dei movimenti principali.</p>'
+                },
+                {
+                    title: 'Se la velocità cala',
+                    body: '<ul><li>Riduci il carico del 5-10%.</li><li>Oppure chiudi la serie prima.</li><li>Oppure mantieni il carico ma fai meno ripetizioni.</li></ul>'
+                },
+                {
+                    title: 'Se hai beach volley intenso nella stessa settimana',
+                    body: '<p>Riduci leggermente:</p><ul><li>salti in palestra;</li><li>contrast training;</li><li>volume degli sprint.</li></ul><p>Il campo conta come carico vero, non come "extra leggero".</p>'
+                }
+            ],
+
+            days: {
+                day1: {
+                    title: 'Salto verticale & spinta sicura',
+                    intro: 'Salto verticale, forza esplosiva degli arti inferiori, spinta diagonale sicura.',
+                    exercises: [
+                        // --- Riscaldamento (R) ---
+                        { id: 'd1_w1', isWarmup: true, name: 'Corda / bike / camminata inclinata', sets: 1, reps: '3 min', rest: 0,
+                          videoLink: 'https://www.youtube.com/results?search_query=salto+corda+riscaldamento+tecnica',
+                          tips: [{ title: 'Obiettivo', html: '<p>Attivazione cardiovascolare leggera. Niente forzature: serve solo ad alzare la temperatura corporea.</p>' }] },
+                        { id: 'd1_w2', isWarmup: true, name: 'Mobilità caviglia al muro', sets: 1, reps: '10 per lato', rest: 0,
+                          videoLink: 'https://www.youtube.com/results?search_query=ankle+mobility+wall+test+esercizio',
+                          tips: [{ title: 'Esecuzione', html: '<ul><li>Ginocchio verso il muro senza staccare il tallone.</li><li>Cerca progressione di range, non forza.</li></ul>' }] },
+                        { id: 'd1_w3', isWarmup: true, name: 'Squat-to-stand', sets: 1, reps: '8', rest: 0,
+                          videoLink: 'https://www.youtube.com/results?search_query=squat+to+stand+mobility+tutorial',
+                          tips: [{ title: 'Esecuzione', html: '<ul><li>Movimento fluido, mani sotto i piedi.</li><li>Apri il torace nella risalita.</li></ul>' }] },
+                        { id: 'd1_w4', isWarmup: true, name: 'Aperture a libro a terra', sets: 2, reps: '8 per lato', rest: 0,
+                          videoLink: 'https://www.youtube.com/results?search_query=book+opening+thoracic+mobility',
+                          tips: [{ title: 'Esecuzione', html: '<ul><li>Sdraiato di lato, ginocchia piegate.</li><li>Apri il braccio cercando rotazione toracica, non lombare.</li></ul>' }] },
+                        { id: 'd1_w5', isWarmup: true, name: 'Scap push-up', sets: 2, reps: '10', rest: 0,
+                          videoLink: 'https://www.youtube.com/results?search_query=scapular+push+up+tutorial',
+                          tips: [{ title: 'Esecuzione', html: '<ul><li>Plank alto, gomiti tesi.</li><li>Lavora solo le scapole: protrazione e retrazione.</li></ul>' }] },
+                        { id: 'd1_w6', isWarmup: true, name: 'Dislocazioni con elastico', sets: 2, reps: '12-15', rest: 0,
+                          videoLink: 'https://www.youtube.com/results?search_query=shoulder+dislocates+band+tutorial',
+                          tips: [{ title: 'Esecuzione', html: '<ul><li>Presa larga, braccia tese.</li><li>Movimento lento, niente strappi.</li></ul>' }] },
+                        { id: 'd1_w7', isWarmup: true, name: 'Pogo jump bassi', sets: 2, reps: '15', rest: 0,
+                          videoLink: 'https://www.youtube.com/results?search_query=pogo+jump+warmup+tutorial',
+                          tips: [{ title: 'Esecuzione', html: '<ul><li>Rimbalzi bassi e veloci.</li><li>Reattività di caviglia, ginocchia quasi tese.</li></ul>' }] },
+                        { id: 'd1_w8', isWarmup: true, name: 'Salti progressivi (pre-Box Jump)', sets: 1, reps: '2-3 salti', rest: 60,
+                          videoLink: 'https://www.youtube.com/results?search_query=approach+jump+warmup+volleyball',
+                          tips: [{ title: 'Esecuzione', html: '<ul><li>Salti progressivi a intensità crescente.</li><li>Servono per innescare il sistema nervoso prima del Box Jump.</li></ul>' }] },
+
+                        // --- Esercizi principali ---
+                        {
+                            id: 'd1_box_jump', name: 'Box Jump', sets: 4, reps: '4', rest: 120,
+                            intensity: 'Massimo intento',
+                            videoLink: 'https://www.youtube.com/results?search_query=box+jump+tutorial+ita+corretto',
+                            tips: [
+                                { title: 'Esecuzione', html: '<ul><li>Parti da fermo.</li><li>Carica anche e braccia.</li><li>Salta cercando massima altezza.</li><li>Atterra morbido e silenzioso.</li><li>Scendi camminando dal box, non saltando giù.</li><li>Recupera pienamente tra le serie.</li></ul>' },
+                                { title: 'Cosa evitare', html: '<ul><li>Box troppo alto scelto solo per "salirci".</li><li>Atterraggio rumoroso.</li><li>Salto giù dal box.</li><li>Ripetizioni fatte quando l\'esplosività è già calata.</li></ul>' },
+                                { title: 'Nota', html: '<p>Il Box Jump è un esercizio, non il test principale del salto verticale. Per misurare il progresso usa il salto verticale da fermo (tab Misurazioni).</p>' }
+                            ]
+                        },
+                        {
+                            id: 'd1_squat', name: 'Squat — Back o Front', sets: 4, reps: '5', rest: 150,
+                            intensity: 'RIR 2-3',
+                            videoLink: 'https://www.youtube.com/results?search_query=squat+bilanciere+esecuzione+corretta',
+                            tips: [
+                                { title: 'Esecuzione', html: '<ul><li>Piedi stabili, pressione su tutto il piede.</li><li>Discesa controllata di circa 2 secondi.</li><li>Tronco solido.</li><li>Risalita con massima intenzione esplosiva.</li><li>Ogni rep deve sembrare atletica, non grindata.</li></ul>' },
+                                { title: 'Criterio di carico', html: '<blockquote>Ne avrei ancora 2, forse 3, ma non 5.</blockquote>' },
+                                { title: 'Cosa evitare', html: '<ul><li>Serie lente.</li><li>Cedimento.</li><li>Ginocchia che collassano verso l\'interno.</li><li>Perdita di tensione in buca.</li><li>Trasformare la seduta in un test di massimale.</li></ul>' }
+                            ]
+                        },
+                        {
+                            id: 'd1_landmine', name: 'Landmine Press a 1 braccio', sets: 3, reps: '6 per braccio', rest: 90,
+                            intensity: 'RIR 2-3',
+                            videoLink: 'https://www.youtube.com/results?search_query=landmine+press+unilaterale+tutorial',
+                            tips: [
+                                { title: 'Esecuzione', html: '<ul><li>Posizione split stance o mezzo inginocchio.</li><li>Costole basse.</li><li>Non inarcare la zona lombare.</li><li>Spingi in diagonale.</li><li>Leggera partecipazione di gambe e tronco.</li><li>Mantieni scapola libera di muoversi.</li></ul>' },
+                                { title: 'Perché lo teniamo', html: '<p>È una spinta più tollerabile della spinta verticale pura, mantiene buon transfer verso muro/attacco senza forzare la spalla in posizione estrema.</p>' },
+                                { title: 'Regola spalla', html: '<table><thead><tr><th>Sensazione</th><th>Azione</th></tr></thead><tbody><tr><td>0/10</td><td>Procedi</td></tr><tr><td>1-2/10</td><td>Monitora</td></tr><tr><td>3/10 o più</td><td>Riduci carico o cambia variante</td></tr><tr><td>Dolore che altera tecnica</td><td>Stop</td></tr></tbody></table>' }
+                            ]
+                        },
+                        {
+                            id: 'd1_rematore', name: 'Rematore con manubrio', sets: 3, reps: '8 per braccio', rest: 90,
+                            intensity: 'RIR 2-3',
+                            videoLink: 'https://www.youtube.com/results?search_query=rematore+manubrio+panca+esecuzione',
+                            tips: [
+                                { title: 'Esecuzione', html: '<ul><li>Tronco stabile.</li><li>Tira il gomito verso l\'anca.</li><li>Non strattonare.</li><li>Fermati un istante in chiusura.</li><li>Controlla la discesa.</li></ul>' },
+                                { title: 'Obiettivo', html: '<p>Bilanciare le spinte, mantenere controllo scapolare e dare supporto alla salute della spalla.</p>' }
                             ]
                         }
-                    }
+                    ]
+                },
+
+                day2: {
+                    title: 'Transfer sabbia, Push Press & catena posteriore',
+                    intro: 'Partenze brevi, spostamento, tecnica del Push Press, catena posteriore, core dinamico. Push Press prima dello Stacco per essere fresco nell\'esercizio tecnicamente più delicato.',
+                    exercises: [
+                        // --- Riscaldamento (R) ---
+                        { id: 'd2_w1', isWarmup: true, name: 'Corda leggera', sets: 1, reps: '3 min', rest: 0,
+                          videoLink: 'https://www.youtube.com/results?search_query=salto+corda+riscaldamento+tecnica',
+                          tips: [{ title: 'Obiettivo', html: '<p>Attivazione cardiovascolare leggera.</p>' }] },
+                        { id: 'd2_w2', isWarmup: true, name: 'Hip hinge con bastone', sets: 2, reps: '8', rest: 0,
+                          videoLink: 'https://www.youtube.com/results?search_query=hip+hinge+stick+tutorial',
+                          tips: [{ title: 'Esecuzione', html: '<ul><li>Bastone su nuca, lombare e sacro: tutti i 3 punti devono restare a contatto.</li><li>Movimento di anca pura, ginocchia poco flesse.</li></ul>' }] },
+                        { id: 'd2_w3', isWarmup: true, name: 'Affondo con rotazione toracica', sets: 1, reps: '6 per lato', rest: 0,
+                          videoLink: 'https://www.youtube.com/results?search_query=thoracic+rotation+lunge+warmup',
+                          tips: [{ title: 'Esecuzione', html: '<ul><li>In affondo, ruota il torace verso la gamba avanti.</li><li>Braccia aperte, sguardo accompagna la rotazione.</li></ul>' }] },
+                        { id: 'd2_w4', isWarmup: true, name: 'Plank laterale', sets: 2, reps: '25-30 sec per lato', rest: 0,
+                          videoLink: 'https://www.youtube.com/results?search_query=side+plank+tutorial',
+                          tips: [{ title: 'Esecuzione', html: '<ul><li>Bacino in linea, non collassare.</li><li>Spalla sopra il gomito.</li></ul>' }] },
+                        { id: 'd2_w5', isWarmup: true, name: 'Front rack stretch leggero', sets: 1, reps: '30 sec', rest: 0,
+                          videoLink: 'https://www.youtube.com/results?search_query=front+rack+mobility+stretch',
+                          tips: [{ title: 'Esecuzione', html: '<ul><li>Bilanciere vuoto in front rack.</li><li>Cerca posizione confortevole, non forzare.</li></ul>' }] },
+                        { id: 'd2_w6', isWarmup: true, name: 'Strict Press con bilanciere vuoto', sets: 1, reps: '8', rest: 0,
+                          videoLink: 'https://www.youtube.com/results?search_query=strict+press+bilanciere+tecnica',
+                          tips: [{ title: 'Obiettivo', html: '<p>Risveglio del pattern di spinta verticale prima del Push Press.</p>' }] },
+                        { id: 'd2_w7', isWarmup: true, name: 'Push Press con bilanciere vuoto', sets: 2, reps: '5', rest: 0,
+                          videoLink: 'https://www.youtube.com/results?search_query=push+press+bilanciere+tutorial',
+                          tips: [{ title: 'Obiettivo', html: '<p>Ripasso tecnico a vuoto. Dip corto, drive di gambe, bilanciere vicino al viso.</p>' }] },
+
+                        // --- Esercizi principali ---
+                        {
+                            id: 'd2_transfer', name: 'Transfer Sabbia', sets: 4, reps: 'variabile', rest: 75,
+                            intensity: 'Massimo intento, qualità',
+                            videoLink: 'https://www.youtube.com/results?search_query=lateral+bound+plyometric+tutorial',
+                            tips: [
+                                { title: 'Quando inserirlo', html: '<p>All\'inizio della seduta, prima dei Broad Jumps, quando sei fresco. Non fare entrambe le opzioni nella stessa seduta.</p>' },
+                                { title: 'Obiettivo', html: '<p>Aggiungere specificità per la sabbia (partenze brevi, lateralità) senza accumulare volume inutile. Vedi varianti settimanali.</p>' }
+                            ],
+                            variants: [
+                                { title: 'Settimane 1, 3, 5 — Accelerazioni brevi', html: '<p><strong>4-6 × 5-10 metri</strong> · Recupero 60-90 s, completo</p><ul><li>Parti basso e reattivo.</li><li>Spingi il terreno indietro.</li><li>Fermati prima che diventi cardio.</li><li>Ogni ripetizione deve essere veloce.</li></ul>' },
+                                { title: 'Settimane 2, 4, 6 — Lateral Bounds', html: '<p><strong>3 × 4 per lato</strong> · Recupero 60-90 s</p><ul><li>Spinta laterale esplosiva.</li><li>Atterraggio controllato su una gamba.</li><li>Bacino stabile.</li><li>Ginocchio allineato al piede.</li><li>Non cercare distanza se perdi controllo.</li></ul>' }
+                            ]
+                        },
+                        {
+                            id: 'd2_broad_jump', name: 'Broad Jump', sets: 4, reps: '4', rest: 120,
+                            intensity: 'Massimo intento',
+                            videoLink: 'https://www.youtube.com/results?search_query=broad+jump+tutorial',
+                            tips: [
+                                { title: 'Esecuzione', html: '<ul><li>Parti da fermo.</li><li>Usa bene le braccia.</li><li>Spingi forte con anche e piedi.</li><li>Atterra morbido.</li><li>Reset completo tra le ripetizioni.</li></ul>' },
+                                { title: 'Cosa evitare', html: '<ul><li>Saltare "a rimbalzo".</li><li>Atterrare rigido.</li><li>Cercare distanza perdendo controllo.</li><li>Fare ripetizioni ravvicinate come circuito.</li></ul>' }
+                            ]
+                        },
+                        {
+                            id: 'd2_push_press', name: 'Push Press', sets: 4, reps: '4', rest: 120,
+                            intensity: 'RIR 2-3',
+                            videoLink: 'https://www.youtube.com/results?search_query=push+press+bilanciere+tutorial',
+                            tips: [
+                                { title: 'Esecuzione', html: '<ol><li>Bilanciere in rack, vicino alle clavicole.</li><li>Gomiti leggermente avanti.</li><li>Piedi circa larghezza anche/spalle.</li><li>Dip verticale: piccolo piegamento di ginocchia e anche.</li><li>Tronco alto, costole giù.</li><li>Drive aggressivo di gambe.</li><li>Il bilanciere sale vicino al viso.</li><li>Chiusura stabile sopra la testa.</li><li>Discesa controllata.</li></ol>' },
+                                { title: 'Cues utili', html: '<ul><li>"Dip corto, drive violento."</li><li>"Gambe prima, braccia dopo."</li><li>"Bilanciere vicino."</li><li>"Costole basse."</li><li>"Non trasformarlo in military press."</li></ul>' },
+                                { title: 'Cosa evitare', html: '<ul><li>Dip troppo profondo.</li><li>Ginocchia che collassano.</li><li>Spinta solo di braccia.</li><li>Iperestensione lombare.</li><li>Ripetizioni lente o grindate.</li><li>Perdita di controllo in discesa.</li></ul>' },
+                                { title: 'Regola qualità', html: '<p>Se hai paura, perdi traiettoria o senti compensi, il carico è troppo alto. Il Push Press deve sentirsi <strong>potente e coordinato</strong>, non "sopravvissuto".</p>' }
+                            ]
+                        },
+                        {
+                            id: 'd2_stacco', name: 'Stacco — Trap Bar / Romeno / Terra', sets: 4, reps: '5', rest: 150,
+                            intensity: 'RIR 2-3',
+                            videoLink: 'https://www.youtube.com/results?search_query=trap+bar+deadlift+esecuzione+corretta',
+                            tips: [
+                                { title: 'Esecuzione', html: '<ul><li>Piedi radicati.</li><li>Schiena neutra.</li><li>Dorsali attivi.</li><li>Spingi il pavimento.</li><li>Chiudi con glutei, non con iperestensione lombare.</li><li>Discesa controllata.</li></ul>' },
+                                { title: 'Nota grip', html: '<p>Se il grip limita molto prima di glutei e femorali, puoi usare straps nelle serie più pesanti. In questa fase il focus non è testare la presa, ma allenare catena posteriore e potenza.</p>' },
+                                { title: 'Cosa evitare', html: '<ul><li>Perdere neutralità lombare.</li><li>Strappare il bilanciere da terra.</li><li>Chiudere iperestendendo la schiena.</li><li>Continuare se la tecnica degrada.</li></ul>' }
+                            ],
+                            variants: [
+                                { title: '1. Trap Bar Deadlift (consigliato)', html: '<p>Ottimo compromesso tra forza, spinta e gestione lombare. Prima scelta per questo ciclo.</p>' },
+                                { title: '2. Stacco Romeno', html: '<p>Ottimo per femorali e glutei, alto controllo eccentrico, lombare protetta.</p>' },
+                                { title: '3. Stacco da terra classico', html: '<p>Valido se la tecnica è solida. Più tecnico, richiede più mobilità di anca/caviglia.</p>' }
+                            ]
+                        },
+                        {
+                            id: 'd2_slam', name: 'Slam con palla medica', sets: 4, reps: '6', rest: 90,
+                            intensity: 'Esplosiva',
+                            videoLink: 'https://www.youtube.com/results?search_query=medicine+ball+slam+tutorial',
+                            tips: [
+                                { title: 'Esecuzione', html: '<ul><li>Porta la palla sopra la testa senza dolore.</li><li>Usa addome, dorsali e anche.</li><li>Scaglia la palla a terra con violenza.</li><li>Non è un esercizio solo di braccia.</li><li>Reset tra le ripetizioni.</li></ul>' },
+                                { title: 'Cosa evitare', html: '<ul><li>Inarcare troppo la lombare.</li><li>Fare ripetizioni lente.</li><li>Trasformarlo in cardio.</li><li>Usare una palla troppo leggera se non riesci a esprimere potenza.</li></ul>' }
+                            ]
+                        }
+                    ]
+                },
+
+                day3: {
+                    title: 'Contrasto, panca esplosiva & salute spalle',
+                    intro: 'Contrast training, spinta esplosiva orizzontale, cuffia/scapola, core antirotazionale.',
+                    exercises: [
+                        // --- Riscaldamento (R) ---
+                        { id: 'd3_w1', isWarmup: true, name: 'Corda / bike / camminata inclinata', sets: 1, reps: '3 min', rest: 0,
+                          videoLink: 'https://www.youtube.com/results?search_query=salto+corda+riscaldamento+tecnica',
+                          tips: [{ title: 'Obiettivo', html: '<p>Attivazione cardiovascolare leggera.</p>' }] },
+                        { id: 'd3_w2', isWarmup: true, name: 'Affondi a corpo libero', sets: 2, reps: '8 per lato', rest: 0,
+                          videoLink: 'https://www.youtube.com/results?search_query=affondi+corpo+libero+esecuzione',
+                          tips: [{ title: 'Esecuzione', html: '<ul><li>Passo lungo, ginocchio allineato col piede.</li><li>Tronco verticale, costole basse.</li></ul>' }] },
+                        { id: 'd3_w3', isWarmup: true, name: 'Cossack squat o shift laterale', sets: 1, reps: '8 per lato', rest: 0,
+                          videoLink: 'https://www.youtube.com/results?search_query=cossack+squat+tutorial',
+                          tips: [{ title: 'Esecuzione', html: '<ul><li>Sposta peso lateralmente, una gamba si piega l\'altra resta tesa.</li><li>Tallone della gamba piegata a terra.</li></ul>' }] },
+                        { id: 'd3_w4', isWarmup: true, name: 'Pogo jump bassi', sets: 2, reps: '12', rest: 0,
+                          videoLink: 'https://www.youtube.com/results?search_query=pogo+jump+warmup+tutorial',
+                          tips: [{ title: 'Esecuzione', html: '<ul><li>Rimbalzi bassi e veloci, reattività di caviglia.</li></ul>' }] },
+                        { id: 'd3_w5', isWarmup: true, name: 'Circonduzioni ampie braccia', sets: 1, reps: '10 avanti + 10 indietro', rest: 0,
+                          videoLink: 'https://www.youtube.com/results?search_query=arm+circles+warmup',
+                          tips: [{ title: 'Esecuzione', html: '<ul><li>Braccia tese, cerchi ampi.</li><li>Ritmo controllato.</li></ul>' }] },
+                        { id: 'd3_w6', isWarmup: true, name: 'Band pull-apart', sets: 2, reps: '15', rest: 0,
+                          videoLink: 'https://www.youtube.com/results?search_query=band+pull+apart+tutorial',
+                          tips: [{ title: 'Esecuzione', html: '<ul><li>Elastico davanti al petto, braccia tese.</li><li>Apri tirando con scapole, non con mani.</li></ul>' }] },
+                        { id: 'd3_w7', isWarmup: true, name: 'Push-up scapolari', sets: 1, reps: '10', rest: 0,
+                          videoLink: 'https://www.youtube.com/results?search_query=scapular+push+up+tutorial',
+                          tips: [{ title: 'Esecuzione', html: '<ul><li>Plank alto, gomiti tesi.</li><li>Solo movimento delle scapole.</li></ul>' }] },
+
+                        // --- Esercizi principali ---
+                        {
+                            id: 'd3_bulgaro', name: 'Complesso Bulgaro — Contrast', sets: 3, reps: '4 pesanti + 4 salti per lato', rest: 120,
+                            intensity: 'Bulgari RIR 2 · Salti massima qualità',
+                            videoLink: 'https://www.youtube.com/results?search_query=affondi+bulgari+contrast+training',
+                            tips: [
+                                { title: 'Esecuzione', html: '<ol><li>Esegui 4 Affondi Bulgari pesanti.</li><li>Appoggia i pesi.</li><li>Esegui 4 Jump Split Squat a corpo libero.</li><li>Recupera pienamente.</li><li>Ripeti.</li></ol>' },
+                                { title: 'Criterio qualità', html: '<p>Il salto dopo i Bulgari deve essere <strong>più reattivo</strong>, non più brutto.</p><p>Se i Jump Split Squat diventano lenti, scoordinati, rumorosi, instabili o asimmetrici, aumenta il recupero tra Bulgari e salti di 30-60s, oppure riduci il carico dei Bulgari.</p>' },
+                                { title: 'Cosa evitare', html: '<ul><li>Cercare cedimento nei Bulgari.</li><li>Perdere equilibrio.</li><li>Ginocchio che collassa.</li><li>Salti fatti per inerzia.</li><li>Atterraggi rigidi.</li></ul>' }
+                            ]
+                        },
+                        {
+                            id: 'd3_panca', name: 'Panca piana esplosiva', sets: 4, reps: '4', rest: 120,
+                            intensity: '55-65% 1RM · Massima velocità',
+                            videoLink: 'https://www.youtube.com/results?search_query=panca+piana+esplosiva+dynamic+effort',
+                            tips: [
+                                { title: 'Esecuzione', html: '<ul><li>Scapole addotte e depresse.</li><li>Piedi stabili.</li><li>Discesa controllata.</li><li>Breve controllo al petto, senza rimbalzo.</li><li>Spinta alla massima velocità.</li><li>Mantieni scapole stabili.</li></ul>' },
+                                { title: 'Cosa evitare', html: '<ul><li>Carico troppo pesante.</li><li>Ripetizioni lente.</li><li>Rimbalzo sul petto.</li><li>Spalle che si anteriorizzano.</li><li>Cedimento.</li></ul>' },
+                                { title: 'Nota', html: '<p>La panca in questa fase non serve a "pompare il petto". Serve a mantenere spinta, velocità e coordinazione senza stressare eccessivamente la spalla.</p>' }
+                            ]
+                        },
+                        {
+                            id: 'd3_face_pull', name: 'Face Pull al cavo', sets: 3, reps: '12-15', rest: 60,
+                            intensity: 'Controllo, non carico massimo',
+                            videoLink: 'https://www.youtube.com/results?search_query=face+pull+cavo+tutorial+spalle',
+                            tips: [
+                                { title: 'Esecuzione', html: '<ul><li>Tira la corda verso occhi/naso.</li><li>Gomiti alti ma non forzati.</li><li>Extraruota alla fine del movimento.</li><li>Pausa breve in chiusura.</li><li>Ritorno controllato.</li></ul>' },
+                                { title: 'Obiettivo', html: '<p>Cuffia, deltoide posteriore, controllo scapolare e igiene posturale.</p>' }
+                            ]
+                        },
+                        {
+                            id: 'd3_pallof', name: 'Pallof Press', sets: 3, reps: '10 per lato', rest: 60,
+                            intensity: 'Controllo',
+                            videoLink: 'https://www.youtube.com/results?search_query=pallof+press+tutorial+core',
+                            tips: [
+                                { title: 'Esecuzione', html: '<ul><li>Posizione atletica.</li><li>Bacino fermo.</li><li>Costole basse.</li><li>Spingi le mani avanti senza ruotare.</li><li>Mantieni 1-2 secondi in estensione.</li><li>Ritorna controllato.</li></ul>' },
+                                { title: 'Obiettivo', html: '<p>Core antirotazionale: trasferire forza senza disperderla, proteggere il tronco nelle torsioni di attacco/difesa.</p>' }
+                            ]
+                        }
+                    ]
                 }
-            ]
+            }
         };
 
-        // ----- STATE -----
-        let currentChart = null;
-        let activeTimers = {};
-        const setProgress = {};      // exId -> n. set completati (in-memory, si azzera a ricarica)
-        let audioCtx = null;         // inizializzato lazy alla prima interazione
-        const currentActiveProgramId = appData.programs.find(p => p.isCurrent).id;
-        let viewingProgram = appData.programs.find(p => p.isCurrent);
-        let currentView = 'overview';
+        const measurementDefs = [
+            { id: 'jump_no_arms', name: 'Salto da fermo (no braccia)', unit: 'cm' },
+            { id: 'jump_arms',    name: 'Salto da fermo (con braccia)', unit: 'cm' },
+            { id: 'squat_max',    name: 'Massimale Squat',    unit: 'kg' },
+            { id: 'bench_max',    name: 'Massimale Panca Piana', unit: 'kg' },
+            { id: 'deadlift_max', name: 'Massimale Stacco',   unit: 'kg' }
+        ];
 
-        // ----- AUDIO -----
+        // ============================================================
+        //  STATE
+        // ============================================================
+        let activeTimers = {};
+        const setProgress = {};
+        let audioCtx = null;
+        let wakeLockSentinel = null;
+        let currentView = 'overview';
+        let currentDayId = null;
+
+        // ============================================================
+        //  AUDIO
+        // ============================================================
         function getAudioCtx() {
             if (!audioCtx) {
                 try {
@@ -377,7 +698,6 @@
             if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
             return audioCtx;
         }
-
         function beep(freq, duration = 0.15, volume = 0.4) {
             const ctx = getAudioCtx();
             if (!ctx) return;
@@ -395,41 +715,33 @@
             osc.start(now);
             osc.stop(now + duration + 0.04);
         }
-        // Warning a -10s: 2 beep discendenti (pattern "scendente" = conto alla rovescia)
         function beepWarning() {
             beep(990, 0.13, 0.5);
             setTimeout(() => beep(660, 0.22, 0.5), 180);
         }
-        // Ready a 0s: 3 beep ascendenti (pattern "salita" = via!)
         function beepReady() {
             beep(880, 0.12, 0.5);
             setTimeout(() => beep(1100, 0.12, 0.5), 130);
             setTimeout(() => beep(1320, 0.22, 0.5), 260);
         }
 
-        // ----- WAKE LOCK (mantieni schermo acceso durante il timer) -----
-        let wakeLockSentinel = null;
-
+        // ============================================================
+        //  WAKE LOCK
+        // ============================================================
         async function acquireWakeLock() {
             if (!('wakeLock' in navigator)) return;
             if (wakeLockSentinel) return;
             try {
                 wakeLockSentinel = await navigator.wakeLock.request('screen');
                 wakeLockSentinel.addEventListener('release', () => { wakeLockSentinel = null; });
-            } catch (e) {
-                console.warn('Wake Lock non acquisito:', e);
-            }
+            } catch (e) { console.warn('Wake Lock non acquisito:', e); }
         }
-
         async function maybeReleaseWakeLock() {
-            // Rilascia solo se nessun timer è ancora attivo
             if (Object.keys(activeTimers).length > 0) return;
             if (!wakeLockSentinel) return;
             try { await wakeLockSentinel.release(); } catch (e) {}
             wakeLockSentinel = null;
         }
-
-        // Riacquisisce il lock quando la pagina torna visibile (es. dopo sblocco schermo)
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible'
                 && Object.keys(activeTimers).length > 0
@@ -438,26 +750,15 @@
             }
         });
 
-        // ----- SET TRACKING -----
+        // ============================================================
+        //  SET TRACKING
+        // ============================================================
         function getSetCount(exId) { return setProgress[exId] || 0; }
 
         window.adjustSets = function(exId, delta, totalSets) {
             const next = Math.max(0, Math.min(totalSets, getSetCount(exId) + delta));
             setProgress[exId] = next;
             updateSetUI(exId, totalSets, false);
-        };
-
-        window.closeWorkout = function(dayId) {
-            const data = viewingProgram.workouts[dayId];
-            if (!data) return;
-            const totalCompleted = data.exercises.reduce((sum, ex) => sum + getSetCount(ex.id), 0);
-            if (totalCompleted === 0) return;
-
-            const msg = `Chiudere l'allenamento di oggi?\n\n${totalCompleted} set completati verranno azzerati per la prossima sessione.`;
-            if (!confirm(msg)) return;
-
-            data.exercises.forEach(ex => { delete setProgress[ex.id]; });
-            renderWorkout(dayId, document.getElementById('main-content'));
         };
 
         function incrementSet(exId, totalSets) {
@@ -470,11 +771,9 @@
         function updateSetUI(exId, totalSets, animate) {
             const count = getSetCount(exId);
             const isComplete = count >= totalSets;
-
             const badge = document.getElementById(`set-badge-${exId}`);
             const counter = document.getElementById(`set-count-${exId}`);
             const card = document.getElementById(`ex-card-${exId}`);
-
             if (badge) {
                 badge.textContent = `${count}/${totalSets} set`;
                 badge.classList.toggle('text-accent', count > 0);
@@ -493,102 +792,160 @@
             if (card) card.classList.toggle('set-complete', isComplete);
         }
 
-        // ----- PROGRAM LOAD -----
-        function loadProgram(programId) {
-            viewingProgram = appData.programs.find(p => p.id === programId);
-
-            document.getElementById('header-program-name').textContent = viewingProgram.name;
-            document.getElementById('header-dates').textContent = `${viewingProgram.startDate} — ${viewingProgram.endDate}`;
-
-            const banner = document.getElementById('archive-banner');
-            const isHistorical = viewingProgram.id !== currentActiveProgramId;
-            banner.classList.toggle('hidden', !isHistorical);
+        // ============================================================
+        //  MODAL
+        // ============================================================
+        function openModal(tag, title, sectionsHtml) {
+            document.getElementById('modal-tag').textContent = tag;
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-body').innerHTML = sectionsHtml;
+            const root = document.getElementById('modal-root');
+            root.classList.remove('hidden');
+            root.classList.add('flex');
+            document.body.style.overflow = 'hidden';
         }
+        window.closeModal = function() {
+            const root = document.getElementById('modal-root');
+            root.classList.add('hidden');
+            root.classList.remove('flex');
+            document.body.style.overflow = '';
+        };
+        document.getElementById('modal-close').addEventListener('click', closeModal);
+        document.getElementById('modal-backdrop').addEventListener('click', closeModal);
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
 
-        // ----- VIEW SWITCH -----
-        function switchView(viewId) {
-            currentView = viewId;
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.setAttribute('aria-selected', 'false'));
-            const activeBtn = document.getElementById(`nav-${viewId}`);
-            if (activeBtn) {
-                activeBtn.setAttribute('aria-selected', 'true');
-                activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        function findExercise(exId) {
+            for (const dayId of Object.keys(program.days)) {
+                const ex = program.days[dayId].exercises.find(e => e.id === exId);
+                if (ex) return ex;
             }
-
-            Object.values(activeTimers).forEach(clearInterval);
-            activeTimers = {};
-
-            const main = document.getElementById('main-content');
-            main.innerHTML = '';
-
-            if (viewId === 'archivio')        renderArchive(main);
-            else if (viewId === 'overview')   renderOverview(main);
-            else                              renderWorkout(viewId, main);
-
-            window.scrollTo({ top: 0, behavior: 'instant' });
+            return null;
         }
 
-        // ----- RENDER: ARCHIVE -----
-        function renderArchive(container) {
-            const items = appData.programs.map(prog => {
-                const active = prog.isCurrent;
-                const badge = active
-                    ? `<span class="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-accent-soft text-accent border border-accent/30">Attivo</span>`
-                    : `<span class="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-elevated text-ink-300 border border-border">Completato</span>`;
-                return `
-                    <button onclick="loadProgram('${prog.id}'); switchView('overview');"
-                        class="pressable text-left w-full card p-4 flex flex-col gap-3 hover:border-accent/50 ${active ? 'border-accent/40' : ''}">
-                        <div class="flex items-start justify-between gap-3">
-                            <h3 class="text-base font-bold text-ink-100 leading-tight">${prog.name}</h3>
-                            ${badge}
-                        </div>
-                        <div class="flex items-center gap-2 text-xs text-ink-300 font-mono">
-                            ${Icon.calendar}
-                            <span>${prog.startDate} — ${prog.endDate}</span>
-                        </div>
-                        <p class="text-sm text-ink-200 leading-snug">
-                            <span class="text-ink-400">Obiettivo:</span> ${prog.goals[0]}
-                        </p>
-                    </button>
-                `;
-            }).join('');
-
-            container.innerHTML = `
-                <section class="fade-in space-y-5">
-                    <div>
-                        <h2 class="text-xl font-bold text-ink-100">Archivio Schede</h2>
-                        <p class="text-sm text-ink-400 mt-1">Lo storico delle tue programmazioni. Tocca una scheda per esplorarla.</p>
-                    </div>
-                    <div class="space-y-3">${items}</div>
+        window.openTipsModal = function(exId) {
+            const ex = findExercise(exId);
+            if (!ex || !ex.tips) return;
+            const html = ex.tips.map(s => `
+                <section class="mb-4">
+                    <h4>${s.title}</h4>
+                    ${s.html}
                 </section>
-            `;
+            `).join('');
+            openModal('Note tecniche', ex.name, html);
+        };
+
+        window.openVariantsModal = function(exId) {
+            const ex = findExercise(exId);
+            if (!ex || !ex.variants) return;
+            const html = ex.variants.map(v => `
+                <section class="mb-4">
+                    <h4 class="text-warn">${v.title}</h4>
+                    ${v.html}
+                </section>
+            `).join('');
+            openModal('Varianti / Progressione', ex.name, html);
+        };
+
+        // ============================================================
+        //  MEASUREMENTS
+        // ============================================================
+        const MEASURE_KEY = 'powerHubMeasurements_v1';
+
+        function loadMeasurements() {
+            try { return JSON.parse(localStorage.getItem(MEASURE_KEY) || '{}'); }
+            catch { return {}; }
+        }
+        function saveMeasurements(data) {
+            localStorage.setItem(MEASURE_KEY, JSON.stringify(data));
+        }
+        function todayISO() {
+            const d = new Date();
+            return d.toISOString().slice(0, 10);
+        }
+        function formatDateIT(iso) {
+            const d = new Date(iso + 'T00:00:00');
+            return d.toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' });
         }
 
-        // ----- RENDER: OVERVIEW -----
+        window.addMeasurement = function(metricId) {
+            const input = document.getElementById(`measure-input-${metricId}`);
+            const valueRaw = input.value.trim().replace(',', '.');
+            const value = parseFloat(valueRaw);
+            if (!Number.isFinite(value) || value < 0) {
+                input.focus();
+                return;
+            }
+            const data = loadMeasurements();
+            const list = data[metricId] || [];
+            list.push({ date: todayISO(), value });
+            list.sort((a, b) => b.date.localeCompare(a.date));
+            data[metricId] = list;
+            saveMeasurements(data);
+            input.value = '';
+            renderMeasurements(document.getElementById('main-content'));
+        };
+
+        window.deleteMeasurement = function(metricId, idx) {
+            const data = loadMeasurements();
+            if (!data[metricId]) return;
+            data[metricId].splice(idx, 1);
+            if (data[metricId].length === 0) delete data[metricId];
+            saveMeasurements(data);
+            renderMeasurements(document.getElementById('main-content'));
+        };
+
+        // ============================================================
+        //  RENDER: OVERVIEW
+        // ============================================================
         function renderOverview(container) {
-            const data = viewingProgram.overview;
-            const isHistorical = viewingProgram.id !== currentActiveProgramId;
-
-            const rulesHtml = data.rules.map(rule => {
-                const ico = ruleIconMap[rule.key] || Icon.bolt;
-                return `
-                    <div class="card p-4 flex gap-3 items-start">
-                        <div class="w-10 h-10 rounded-xl bg-accent-soft border border-accent/30 text-accent flex items-center justify-center flex-shrink-0">
-                            ${ico}
-                        </div>
-                        <div class="min-w-0">
-                            <h4 class="font-bold text-ink-100 text-sm">${rule.title}</h4>
-                            <p class="text-sm text-ink-300 leading-relaxed mt-1">${rule.desc}</p>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-
-            const goalsHtml = viewingProgram.goals.map(g => `
+            const goalsHtml = program.goals.map(g => `
                 <li class="flex gap-2 text-sm text-ink-200 leading-relaxed">
                     <span class="text-accent flex-shrink-0 mt-0.5">${Icon.check}</span>
                     <span>${g}</span>
                 </li>
+            `).join('');
+
+            const principlesHtml = program.principles.map((p, i) => `
+                <details class="card group">
+                    <summary class="accordion-btn list-none p-4 cursor-pointer flex items-start justify-between gap-3" onclick="this.closest('details').toggleAttribute('data-open')">
+                        <div class="min-w-0 flex-1">
+                            <h4 class="text-sm font-bold text-ink-100">${p.title}</h4>
+                            <p class="text-xs text-ink-400 mt-0.5 leading-snug">${p.short}</p>
+                        </div>
+                        <span class="accordion-chevron text-ink-400 mt-1 flex-shrink-0">${Icon.chevron}</span>
+                    </summary>
+                    <div class="px-4 pb-4 pt-1 text-sm prose-content border-t border-border bg-base/40">
+                        ${p.body}
+                    </div>
+                </details>
+            `).join('');
+
+            const paradigmRows = program.paradigm.map(([focus, oldV, newV]) => `
+                <tr><td>${focus}</td><td>${oldV}</td><td class="text-accent font-semibold">${newV}</td></tr>
+            `).join('');
+
+            const progressionRows = program.progression.map(([w, obj, sq, pp, sj, note]) => `
+                <tr><td class="num font-bold text-accent">W${w}</td><td>${obj}</td><td>${sq}</td><td>${pp}</td><td>${sj}</td><td class="text-ink-300">${note}</td></tr>
+            `).join('');
+
+            const incrementRows = program.progressionRules.increments.map(([ex, inc]) => `
+                <tr><td>${ex}</td><td class="num">${inc}</td></tr>
+            `).join('');
+
+            const whenList = program.progressionRules.when.map(w => `<li>${w}</li>`).join('');
+
+            const autoregHtml = program.autoreg.map(a => `
+                <details class="card">
+                    <summary class="accordion-btn list-none p-4 cursor-pointer flex items-center justify-between gap-3">
+                        <h4 class="text-sm font-bold text-ink-100">${a.title}</h4>
+                        <span class="accordion-chevron text-ink-400 flex-shrink-0">${Icon.chevron}</span>
+                    </summary>
+                    <div class="px-4 pb-4 pt-1 prose-content border-t border-border bg-base/40">
+                        ${a.body}
+                    </div>
+                </details>
             `).join('');
 
             container.innerHTML = `
@@ -598,17 +955,16 @@
                     <div class="card-elevated p-5">
                         <div class="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-accent mb-2">
                             <span class="w-1.5 h-1.5 rounded-full bg-accent"></span>
-                            Programma in corso
+                            Programma in corso · v${program.version}
                         </div>
-                        <h2 class="text-xl font-bold text-ink-100 leading-tight">${viewingProgram.name}</h2>
-                        <p class="text-sm text-ink-300 leading-relaxed mt-3">${data.intro}</p>
-
+                        <h2 class="text-xl font-bold text-ink-100 leading-tight">${program.name}</h2>
+                        <p class="text-sm text-ink-300 mt-1">${program.startDate} → ${program.endDate}</p>
                         <div class="flex flex-wrap gap-2 mt-4">
                             <span class="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-lg bg-elevated border border-border text-ink-200 font-medium">
-                                ${Icon.calendar}<span>${viewingProgram.frequency}</span>
+                                ${Icon.calendar}<span>${program.frequency}</span>
                             </span>
                             <span class="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-lg bg-elevated border border-border text-ink-200 font-medium">
-                                ${Icon.clock}<span>${viewingProgram.duration}</span>
+                                ${Icon.clock}<span>${program.duration}</span>
                             </span>
                         </div>
                     </div>
@@ -622,116 +978,170 @@
                         <ul class="space-y-2">${goalsHtml}</ul>
                     </div>
 
-                    <!-- Rules -->
-                    <div class="space-y-3">
-                        <h3 class="text-base font-bold text-ink-100 px-1">Principi del ciclo</h3>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">${rulesHtml}</div>
+                    <!-- Filosofia -->
+                    <div class="card p-5">
+                        <h3 class="text-base font-bold text-ink-100 mb-2">Filosofia del ciclo</h3>
+                        <p class="text-sm text-ink-300 leading-relaxed">Questa fase non è bodybuilding. È <strong class="text-ink-100">preparazione atletica per il beach volley</strong>. L'obiettivo non è "sentire il muscolo distrutto", ma diventare più efficace nei gesti che contano: saltare, murare, attaccare, frenare, ripartire, atterrare bene, mantenere la spalla sana.</p>
+                        <blockquote class="mt-3 border-l-4 border-accent bg-accent-soft px-4 py-2 text-sm text-ink-100">
+                            La seduta riuscita non è quella che ti lascia cotto. È quella in cui ogni rep importante è stata <strong>veloce, pulita e trasferibile</strong>.
+                        </blockquote>
                     </div>
 
-                    <!-- Chart -->
-                    ${!isHistorical ? `
-                        <div class="card p-5">
-                            <div class="flex items-center gap-2 mb-1">
-                                <span class="text-accent">${Icon.bolt}</span>
-                                <h3 class="text-base font-bold text-ink-100">Analisi del paradigma</h3>
-                            </div>
-                            <p class="text-xs text-ink-400 mb-4">Confronto fisiologico tra il vecchio approccio e la preparazione atletica.</p>
-                            <div class="chart-container"><canvas id="paradigmChart"></canvas></div>
+                    <!-- Principi -->
+                    <div class="space-y-3">
+                        <h3 class="text-sm font-bold uppercase tracking-wider text-ink-400 px-1">Principi guida</h3>
+                        <div class="space-y-2">${principlesHtml}</div>
+                    </div>
+
+                    <!-- Cambio paradigma -->
+                    <div class="card p-5">
+                        <h3 class="text-base font-bold text-ink-100 mb-3">Bodybuilding vs Athletic Power</h3>
+                        <div class="overflow-x-auto -mx-2 px-2">
+                            <table class="prose-table">
+                                <thead><tr><th>Focus</th><th>Bodybuilding</th><th>Athletic Power</th></tr></thead>
+                                <tbody>${paradigmRows}</tbody>
+                            </table>
                         </div>
-                    ` : `
-                        <div class="card p-6 text-center text-sm text-ink-400 italic">
-                            Grafico di analisi disponibile solo per il ciclo attivo.
+                    </div>
+
+                    <!-- Distribuzione settimanale -->
+                    <div class="card p-5">
+                        <h3 class="text-base font-bold text-ink-100 mb-2">Distribuzione settimanale</h3>
+                        <p class="text-sm text-ink-300 leading-relaxed mb-3">${program.schedule.rule}</p>
+                        <div class="space-y-2">
+                            ${program.schedule.examples.map(e => `<div class="text-sm font-mono text-accent bg-elevated border border-border rounded-lg px-3 py-2">${e}</div>`).join('')}
                         </div>
-                    `}
+                        <p class="text-xs text-ink-400 mt-3 italic">${program.schedule.note}</p>
+                    </div>
+
+                    <!-- Progressione 6 settimane -->
+                    <div class="card p-5">
+                        <h3 class="text-base font-bold text-ink-100 mb-3">Progressione 6 settimane</h3>
+                        <div class="overflow-x-auto -mx-2 px-2">
+                            <table class="prose-table">
+                                <thead><tr><th>Sett</th><th>Obiettivo</th><th>Squat / Stacco</th><th>Push Press</th><th>Salti</th><th>Note</th></tr></thead>
+                                <tbody>${progressionRows}</tbody>
+                            </table>
+                        </div>
+
+                        <h4 class="text-sm font-bold text-ink-100 mt-5 mb-2">Aumenta il carico solo se:</h4>
+                        <ul class="space-y-1.5 pl-5 text-sm text-ink-300 list-disc">${whenList}</ul>
+
+                        <h4 class="text-sm font-bold text-ink-100 mt-4 mb-2">Aumenti consigliati</h4>
+                        <table class="prose-table">
+                            <thead><tr><th>Esercizio</th><th>Aumento</th></tr></thead>
+                            <tbody>${incrementRows}</tbody>
+                        </table>
+                    </div>
+
+                    <!-- Autoregolazione -->
+                    <div class="space-y-3">
+                        <h3 class="text-sm font-bold uppercase tracking-wider text-ink-400 px-1">Regole di autoregolazione</h3>
+                        <div class="space-y-2">${autoregHtml}</div>
+                    </div>
+
+                    <!-- Frase chiusura -->
+                    <div class="card-elevated p-5 text-center">
+                        <p class="text-sm text-accent font-bold tracking-wider uppercase">Fresco sì. Leggero no.</p>
+                        <p class="text-xs text-ink-400 mt-1">Esplosivo sì. Caotico no. Misurabile sì. Distruttivo no.</p>
+                    </div>
                 </section>
             `;
-
-            if (!isHistorical) initChart();
         }
 
-        // ----- RENDER: WORKOUT -----
-        function renderWorkout(dayId, container) {
-            const data = viewingProgram.workouts[dayId];
-            if (!data) {
-                container.innerHTML = `
-                    <div class="fade-in card p-8 text-center text-ink-400">
-                        Giorno di allenamento non previsto in questa scheda archiviata.
-                    </div>`;
+        // ============================================================
+        //  RENDER: WORKOUT DAY
+        // ============================================================
+        function renderDay(dayId, container) {
+            const day = program.days[dayId];
+            if (!day) {
+                container.innerHTML = `<div class="fade-in card p-8 text-center text-ink-400">Giorno non trovato.</div>`;
                 return;
             }
 
-            const isReadOnly = viewingProgram.id !== currentActiveProgramId;
+            let mainCounter = 0;
 
-            const warmupHtml = data.warmup.map(item => `
-                <li class="flex gap-2 items-start text-sm text-ink-200">
-                    <span class="w-1 h-1 mt-2 rounded-full bg-warn flex-shrink-0"></span>
-                    <span class="leading-relaxed">${item}</span>
-                </li>
-            `).join('');
-
-            const exercisesHtml = data.exercises.map((ex, i) => {
-                const storageKey = `beachVolleyApp_${viewingProgram.id}_${dayId}_${ex.id}`;
+            const exercisesHtml = day.exercises.map(ex => {
+                const storageKey = `beachVolleyApp_${program.id}_${dayId}_${ex.id}`;
                 const savedLoad = localStorage.getItem(storageKey) || '';
                 const initialSetCount = getSetCount(ex.id);
-                const isComplete = initialSetCount >= ex.sets;
+                const isComplete = !ex.isWarmup && initialSetCount >= ex.sets;
+                const hasTimer = ex.rest > 0;
+
+                let badgeText, badgeClasses;
+                if (ex.isWarmup) {
+                    badgeText = 'R';
+                    badgeClasses = 'bg-warn-soft border-warn/30 text-warn';
+                } else {
+                    mainCounter++;
+                    badgeText = String(mainCounter).padStart(2, '0');
+                    badgeClasses = 'bg-accent-soft border-accent/30 text-accent';
+                }
+
+                const intensityHtml = ex.intensity ? `<span class="text-[11px] font-mono px-2 py-0.5 rounded bg-elevated text-ink-300 border border-border">${ex.intensity}</span>` : '';
+                const setBadgeHtml = !ex.isWarmup ? `<span id="set-badge-${ex.id}" class="set-badge text-[11px] font-mono px-2 py-0.5 rounded bg-elevated ${initialSetCount > 0 ? 'text-accent' : 'text-ink-200'} border border-border">${initialSetCount}/${ex.sets} set</span>` : '';
+                const repsBadgeHtml = `<span class="text-[11px] font-mono px-2 py-0.5 rounded bg-elevated text-ink-200 border border-border">${ex.sets}×${ex.reps}</span>`;
+                const restBadgeHtml = hasTimer ? `<span class="text-[11px] font-mono px-2 py-0.5 rounded bg-elevated text-accent border border-accent/20 inline-flex items-center gap-1">${Icon.timer}${ex.rest}s</span>` : '';
+
+                const infoBtn = ex.tips ? `<button onclick="event.stopPropagation(); openTipsModal('${ex.id}')" aria-label="Info ${ex.name}" class="pressable w-9 h-9 rounded-lg bg-elevated border border-border text-ink-300 hover:text-accent hover:border-accent/40 flex items-center justify-center flex-shrink-0">${Icon.info}</button>` : '';
+                const alertBtn = ex.variants ? `<button onclick="event.stopPropagation(); openVariantsModal('${ex.id}')" aria-label="Varianti ${ex.name}" class="pressable w-9 h-9 rounded-lg bg-warn-soft border border-warn/30 text-warn hover:bg-warn/20 flex items-center justify-center flex-shrink-0">${Icon.alert}</button>` : '';
 
                 return `
                     <article id="ex-card-${ex.id}" class="card overflow-hidden ${isComplete ? 'set-complete' : ''}">
-                        <button class="w-full text-left p-4 pressable" onclick="toggleDetails('${ex.id}')" aria-expanded="false" aria-controls="details-${ex.id}">
+                        <div role="button" tabindex="0" class="w-full text-left p-4 pressable cursor-pointer" onclick="toggleDetails('${ex.id}')" aria-expanded="false" aria-controls="details-${ex.id}">
                             <div class="flex items-start gap-3">
-                                <div class="w-9 h-9 rounded-lg bg-accent-soft border border-accent/30 text-accent font-bold flex items-center justify-center flex-shrink-0 font-mono text-sm">
-                                    ${String(i + 1).padStart(2, '0')}
+                                <div class="w-9 h-9 rounded-lg ${badgeClasses} font-bold flex items-center justify-center flex-shrink-0 font-mono text-sm border">
+                                    ${badgeText}
                                 </div>
                                 <div class="flex-1 min-w-0">
                                     <h4 class="text-base font-bold text-ink-100 leading-tight">${ex.name}</h4>
                                     <div class="flex flex-wrap gap-1.5 mt-2">
-                                        <span id="set-badge-${ex.id}" class="set-badge text-[11px] font-mono px-2 py-0.5 rounded bg-elevated ${initialSetCount > 0 ? 'text-accent' : 'text-ink-200'} border border-border">${initialSetCount}/${ex.sets} set</span>
-                                        <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-elevated text-ink-200 border border-border">× ${ex.reps}</span>
-                                        <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-elevated text-accent border border-accent/20 inline-flex items-center gap-1">${Icon.timer}${ex.rest}s</span>
+                                        ${setBadgeHtml}
+                                        ${repsBadgeHtml}
+                                        ${restBadgeHtml}
+                                        ${intensityHtml}
                                     </div>
                                 </div>
-                                <span id="toggle-icon-${ex.id}" class="text-ink-400 transition-transform duration-200 mt-1 flex-shrink-0">${Icon.chevron}</span>
+                                <div class="flex items-center gap-1.5 flex-shrink-0">
+                                    ${infoBtn}
+                                    ${alertBtn}
+                                    <span id="toggle-icon-${ex.id}" class="text-ink-400 transition-transform duration-200 w-6 h-6 flex items-center justify-center">${Icon.chevron}</span>
+                                </div>
                             </div>
-                        </button>
+                        </div>
 
                         <div id="details-${ex.id}" class="hidden border-t border-border bg-base/40 px-4 py-4 space-y-4">
-                            <!-- Note -->
-                            <div class="flex gap-2 items-start">
-                                <span class="text-warn mt-0.5 flex-shrink-0">${Icon.info}</span>
-                                <p class="text-sm text-ink-200 leading-relaxed">${ex.note}</p>
-                            </div>
-
-                            <!-- Video -->
                             <a href="${ex.videoLink}" target="_blank" rel="noopener noreferrer"
                                class="pressable inline-flex items-center justify-center gap-2 w-full sm:w-auto bg-elevated hover:bg-base border border-border hover:border-danger/40 text-ink-100 hover:text-danger px-4 py-2.5 rounded-xl font-semibold text-sm">
                                 <span class="text-danger">${Icon.play}</span>
                                 Tutorial su YouTube
                             </a>
 
-                            <!-- Load -->
-                            <div class="card-elevated p-3 flex items-center justify-between gap-3">
-                                <div class="min-w-0">
-                                    <div class="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-ink-400">
-                                        ${Icon.scale}<span>Carico</span>
+                            ${!ex.isWarmup ? `
+                                <!-- Carico -->
+                                <div class="card-elevated p-3 flex items-center justify-between gap-3">
+                                    <div class="min-w-0">
+                                        <div class="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-ink-400">
+                                            ${Icon.scale}<span>Carico</span>
+                                        </div>
+                                        <p class="text-[11px] text-ink-500 mt-0.5 leading-tight">Tieni traccia dei progressi</p>
                                     </div>
-                                    <p class="text-[11px] text-ink-500 mt-0.5 leading-tight">${isReadOnly ? 'Storico registrato' : 'Tieni traccia dei progressi'}</p>
+                                    <div class="flex items-stretch gap-1.5 flex-shrink-0">
+                                        <button onclick="adjustLoad('${ex.id}', -2.5)" class="pressable w-9 h-11 rounded-lg bg-elevated border border-border text-ink-200 hover:text-accent hover:border-accent/40 font-bold text-lg leading-none">−</button>
+                                        <input type="number" inputmode="decimal" step="0.5" id="load-${ex.id}"
+                                               value="${savedLoad}"
+                                               onchange="saveLoad('${dayId}', '${ex.id}', this.value)"
+                                               placeholder="—"
+                                               class="w-20 h-11 text-center font-mono font-bold text-base bg-base border border-border rounded-lg text-accent placeholder:text-ink-500 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent">
+                                        <button onclick="adjustLoad('${ex.id}', 2.5)" class="pressable w-9 h-11 rounded-lg bg-elevated border border-border text-ink-200 hover:text-accent hover:border-accent/40 font-bold text-lg leading-none">+</button>
+                                        <span class="self-center text-xs text-ink-400 font-semibold ml-1">kg</span>
+                                    </div>
                                 </div>
-                                <div class="flex items-stretch gap-1.5 flex-shrink-0">
-                                    ${!isReadOnly ? `<button onclick="adjustLoad('${ex.id}', -2.5)" class="pressable w-9 h-11 rounded-lg bg-elevated border border-border text-ink-200 hover:text-accent hover:border-accent/40 font-bold text-lg leading-none">−</button>` : ''}
-                                    <input type="number" inputmode="decimal" step="0.5" id="load-${ex.id}"
-                                           value="${savedLoad}" ${isReadOnly ? 'disabled' : ''}
-                                           onchange="saveLoad('${viewingProgram.id}', '${dayId}', '${ex.id}', this.value)"
-                                           placeholder="—"
-                                           class="w-20 h-11 text-center font-mono font-bold text-base bg-base border border-border rounded-lg text-accent placeholder:text-ink-500 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent disabled:opacity-60 disabled:text-ink-300">
-                                    ${!isReadOnly ? `<button onclick="adjustLoad('${ex.id}', 2.5)" class="pressable w-9 h-11 rounded-lg bg-elevated border border-border text-ink-200 hover:text-accent hover:border-accent/40 font-bold text-lg leading-none">+</button>` : ''}
-                                    <span class="self-center text-xs text-ink-400 font-semibold ml-1">kg</span>
-                                </div>
-                            </div>
+                            ` : ''}
 
-                            <!-- Timer + Set tracker -->
-                            ${!isReadOnly ? `
+                            ${hasTimer && !ex.isWarmup ? `
+                                <!-- Timer + Set tracker -->
                                 <div class="card-elevated p-3">
-                                    <!-- Timer row -->
                                     <div class="flex items-center justify-between gap-3">
                                         <div class="min-w-0">
                                             <div class="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-ink-400">
@@ -747,8 +1157,6 @@
                                     <div class="timer-track mt-3 hidden" id="bar-container-${ex.id}">
                                         <div class="timer-fill" id="bar-fill-${ex.id}"></div>
                                     </div>
-
-                                    <!-- Set counter row -->
                                     <div class="mt-3 pt-3 border-t border-border flex items-center justify-between gap-3">
                                         <div class="min-w-0">
                                             <div class="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-ink-400">
@@ -771,12 +1179,11 @@
                 `;
             }).join('');
 
-            // Pulsante "Chiudi allenamento" — appare solo se c'è qualche set completato
-            const totalCompleted = data.exercises.reduce((sum, ex) => sum + getSetCount(ex.id), 0);
-            const totalRequired  = data.exercises.reduce((sum, ex) => sum + ex.sets, 0);
-            const allDone = totalCompleted >= totalRequired && totalRequired > 0;
+            const totalCompleted = day.exercises.filter(e => !e.isWarmup).reduce((s, e) => s + getSetCount(e.id), 0);
+            const totalRequired = day.exercises.filter(e => !e.isWarmup).reduce((s, e) => s + e.sets, 0);
+            const allDone = totalRequired > 0 && totalCompleted >= totalRequired;
 
-            const closeButtonHtml = (!isReadOnly && totalCompleted > 0) ? `
+            const closeBtn = totalCompleted > 0 ? `
                 <button onclick="closeWorkout('${dayId}')"
                         class="pressable w-full inline-flex items-center justify-center gap-2 ${allDone ? 'bg-accent hover:bg-accent-dark text-base shadow-glow-accent' : 'bg-elevated hover:bg-base text-ink-100 border border-border hover:border-accent/40'} font-bold text-sm px-4 h-12 rounded-xl mt-4">
                     <span class="${allDone ? '' : 'text-accent'}">${Icon.check}</span>
@@ -784,40 +1191,123 @@
                 </button>
             ` : '';
 
+            const dayLabel = dayId.replace('day', 'Giorno ');
+
             container.innerHTML = `
                 <section class="fade-in space-y-5">
-
-                    <!-- Day Hero -->
                     <div class="card-elevated p-5">
-                        <div class="text-[11px] font-semibold uppercase tracking-wider text-accent">${dayId.replace('giorno', 'Giorno ')}</div>
-                        <h2 class="text-2xl font-extrabold text-ink-100 leading-tight mt-1">${data.title}</h2>
-                        <p class="text-sm text-ink-300 mt-1">${data.subtitle}</p>
-                        <p class="text-sm text-ink-300 leading-relaxed mt-3 pt-3 border-t border-border">${data.intro}</p>
+                        <div class="text-[11px] font-semibold uppercase tracking-wider text-accent">${dayLabel}</div>
+                        <h2 class="text-2xl font-extrabold text-ink-100 leading-tight mt-1">${day.title}</h2>
+                        <p class="text-sm text-ink-300 leading-relaxed mt-3">${day.intro}</p>
                     </div>
-
-                    <!-- Warmup -->
-                    <div class="card p-4">
-                        <div class="flex items-center gap-2 mb-2">
-                            <span class="text-warn">${Icon.flame}</span>
-                            <h3 class="text-sm font-bold text-ink-100">Riscaldamento <span class="text-ink-400 font-medium">· 5–10 min</span></h3>
-                        </div>
-                        <ul class="space-y-1.5 pl-1">${warmupHtml}</ul>
-                    </div>
-
-                    <!-- Exercises -->
                     <div class="space-y-3">
-                        <h3 class="text-sm font-bold uppercase tracking-wider text-ink-400 px-1">Esercizi</h3>
                         ${exercisesHtml}
                     </div>
-
-                    ${closeButtonHtml}
+                    ${closeBtn}
                 </section>
             `;
         }
 
-        // ----- INTERACTIONS -----
-        window.saveLoad = function(progId, dayId, exId, value) {
-            localStorage.setItem(`beachVolleyApp_${progId}_${dayId}_${exId}`, value);
+        // ============================================================
+        //  RENDER: MEASUREMENTS
+        // ============================================================
+        function renderMeasurements(container) {
+            const data = loadMeasurements();
+
+            const cards = measurementDefs.map(m => {
+                const entries = data[m.id] || [];
+                const latest = entries[0];
+                const history = entries.slice(0, 5).map((e, i) => `
+                    <li class="flex items-center justify-between gap-2 py-1.5 ${i > 0 ? 'border-t border-border/60' : ''}">
+                        <span class="text-xs font-mono text-ink-400 inline-flex items-center gap-1.5">${Icon.calendar}${formatDateIT(e.date)}</span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-mono font-bold ${i === 0 ? 'text-accent' : 'text-ink-200'}">${e.value}<span class="text-ink-400 font-normal ml-0.5 text-xs">${m.unit}</span></span>
+                            <button onclick="deleteMeasurement('${m.id}', ${i})" aria-label="Elimina" class="pressable text-ink-500 hover:text-danger w-6 h-6 flex items-center justify-center">${Icon.trash}</button>
+                        </div>
+                    </li>
+                `).join('');
+
+                return `
+                    <div class="card p-5">
+                        <div class="flex items-start justify-between gap-3 mb-3">
+                            <div class="min-w-0">
+                                <h3 class="text-sm font-bold text-ink-100 leading-tight">${m.name}</h3>
+                                <p class="text-[11px] text-ink-400 mt-0.5">Unità: ${m.unit}</p>
+                            </div>
+                            ${latest ? `
+                                <div class="text-right flex-shrink-0">
+                                    <p class="font-mono text-2xl font-extrabold text-accent leading-none">${latest.value}<span class="text-base text-ink-400 font-normal ml-1">${m.unit}</span></p>
+                                    <p class="text-[10px] text-ink-400 font-mono mt-1">${formatDateIT(latest.date)}</p>
+                                </div>
+                            ` : `
+                                <div class="text-right flex-shrink-0">
+                                    <p class="text-xs text-ink-500 italic">Nessun dato</p>
+                                </div>
+                            `}
+                        </div>
+
+                        <div class="flex items-stretch gap-2 mb-3">
+                            <input type="number" inputmode="decimal" step="0.5" id="measure-input-${m.id}"
+                                   placeholder="Nuovo valore"
+                                   class="flex-1 h-11 px-3 font-mono font-semibold text-sm bg-base border border-border rounded-lg text-ink-100 placeholder:text-ink-500 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent"
+                                   onkeypress="if(event.key==='Enter') addMeasurement('${m.id}')">
+                            <button onclick="addMeasurement('${m.id}')"
+                                    class="pressable inline-flex items-center justify-center gap-1.5 bg-accent hover:bg-accent-dark text-base font-bold text-sm px-4 h-11 rounded-lg flex-shrink-0">
+                                ${Icon.plus}<span>Salva</span>
+                            </button>
+                        </div>
+
+                        ${entries.length > 0 ? `
+                            <details class="text-xs">
+                                <summary class="cursor-pointer text-ink-400 hover:text-ink-200 inline-flex items-center gap-1 select-none">${Icon.chevron}<span>Storico (${entries.length})</span></summary>
+                                <ul class="mt-2 list-none">${history}</ul>
+                            </details>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = `
+                <section class="fade-in space-y-5">
+                    <div class="card-elevated p-5">
+                        <h2 class="text-xl font-bold text-ink-100 leading-tight">Misurazioni</h2>
+                        <p class="text-sm text-ink-300 mt-1 leading-relaxed">Le 5 metriche di riferimento del ciclo. La data viene impostata in automatico al salvataggio.</p>
+                    </div>
+                    <div class="space-y-3">${cards}</div>
+                </section>
+            `;
+        }
+
+        // ============================================================
+        //  VIEW SWITCH
+        // ============================================================
+        function switchView(viewId) {
+            currentView = viewId;
+            currentDayId = viewId.startsWith('day') ? viewId : null;
+
+            document.querySelectorAll('.bottom-tab').forEach(b => b.setAttribute('aria-selected', 'false'));
+            const activeTab = document.getElementById(`tab-${viewId}`);
+            if (activeTab) activeTab.setAttribute('aria-selected', 'true');
+
+            Object.values(activeTimers).forEach(clearInterval);
+            activeTimers = {};
+
+            const main = document.getElementById('main-content');
+            main.innerHTML = '';
+
+            if (viewId === 'overview')          renderOverview(main);
+            else if (viewId === 'measurements') renderMeasurements(main);
+            else if (viewId.startsWith('day'))  renderDay(viewId, main);
+
+            window.scrollTo({ top: 0, behavior: 'instant' });
+        }
+        window.switchView = switchView;
+
+        // ============================================================
+        //  EXERCISE INTERACTIONS
+        // ============================================================
+        window.saveLoad = function(dayId, exId, value) {
+            localStorage.setItem(`beachVolleyApp_${program.id}_${dayId}_${exId}`, value);
         };
 
         window.adjustLoad = function(exId, delta) {
@@ -832,8 +1322,7 @@
         window.toggleDetails = function(exId) {
             const details = document.getElementById(`details-${exId}`);
             const icon = document.getElementById(`toggle-icon-${exId}`);
-            const btn = icon?.closest('button');
-
+            const btn = icon?.closest('[role="button"]');
             if (details.classList.contains('hidden')) {
                 details.classList.remove('hidden');
                 details.classList.add('expand-in');
@@ -847,6 +1336,20 @@
             }
         };
 
+        window.closeWorkout = function(dayId) {
+            const day = program.days[dayId];
+            if (!day) return;
+            const totalCompleted = day.exercises.filter(e => !e.isWarmup).reduce((s, e) => s + getSetCount(e.id), 0);
+            if (totalCompleted === 0) return;
+            const msg = `Chiudere l'allenamento di oggi?\n\n${totalCompleted} set completati verranno azzerati per la prossima sessione.`;
+            if (!confirm(msg)) return;
+            day.exercises.forEach(ex => { delete setProgress[ex.id]; });
+            renderDay(dayId, document.getElementById('main-content'));
+        };
+
+        // ============================================================
+        //  TIMER
+        // ============================================================
         function formatTime(seconds) {
             const m = Math.floor(seconds / 60);
             const s = seconds % 60;
@@ -856,9 +1359,7 @@
         window.startTimer = function(exId, totalSeconds, totalSets) {
             if (activeTimers[exId]) clearInterval(activeTimers[exId]);
 
-            // Sblocca AudioContext durante il gesto utente (necessario su mobile)
             getAudioCtx();
-            // Mantieni lo schermo acceso per la durata del timer
             acquireWakeLock();
 
             const startTime = Date.now();
@@ -886,28 +1387,22 @@
             display.classList.add('text-ink-100');
             display.textContent = formatTime(totalSeconds);
 
-            // Tick basato su tempo assoluto: se il browser ci strozza, al risveglio
-            // il valore mostrato è comunque corretto (recupera lo "scatto").
             function tick() {
                 const now = Date.now();
                 const timeLeft = Math.max(0, Math.ceil((endTime - now) / 1000));
-
                 display.textContent = formatTime(timeLeft);
                 const pct = Math.min(100, ((totalSeconds - timeLeft) / totalSeconds) * 100);
                 barFill.style.width = `${pct}%`;
-
-                // Avviso a 10s — una sola volta, solo se siamo davvero vicini al confine
                 if (!warned && timeLeft <= 10 && timeLeft > 5 && totalSeconds > 12) {
                     warned = true;
                     beepWarning();
                     if (navigator.vibrate) navigator.vibrate(80);
                 }
-
                 if (!completed && timeLeft <= 0) {
                     completed = true;
                     clearInterval(activeTimers[exId]);
                     delete activeTimers[exId];
-                    display.textContent = "PRONTO";
+                    display.textContent = 'PRONTO';
                     display.classList.remove('text-ink-100');
                     display.classList.add('text-accent', 'ready-pulse');
                     beepReady();
@@ -917,7 +1412,6 @@
                     setTimeout(() => resetTimerUI(exId, totalSeconds, true, totalSets), 1500);
                 }
             }
-
             tick();
             activeTimers[exId] = setInterval(tick, 1000);
         };
@@ -935,105 +1429,27 @@
             const display = document.getElementById(`timer-display-${exId}`);
             const btn = document.getElementById(`btn-timer-${exId}`);
             const barContainer = document.getElementById(`bar-container-${exId}`);
-
             if (!keepReady) {
                 display.textContent = formatTime(originalRest);
                 display.classList.remove('text-accent', 'ready-pulse');
                 display.classList.add('text-ink-100');
             }
-
             btn.innerHTML = `${Icon.bolt}Avvia`;
             btn.classList.remove('bg-danger', 'hover:bg-red-600');
             btn.classList.add('bg-accent', 'hover:bg-accent-dark', 'text-base');
             btn.onclick = () => startTimer(exId, originalRest, totalSets);
-
             setTimeout(() => barContainer?.classList.add('hidden'), 800);
         }
 
-        // ----- CHART -----
-        function initChart() {
-            const ctx = document.getElementById('paradigmChart');
-            if (!ctx) return;
-            if (currentChart) currentChart.destroy();
+        // ============================================================
+        //  INIT
+        // ============================================================
+        window.onload = () => switchView('overview');
 
-            currentChart = new Chart(ctx, {
-                type: 'radar',
-                data: {
-                    labels: ['Forza Max', 'Ipertrofia', 'Stress Spalla', 'Esplosività', 'Velocità/Salto', 'Salute Articolare'],
-                    datasets: [
-                        {
-                            label: 'Vecchia (Bodybuilding)',
-                            data: [7, 9, 8, 3, 2, 4],
-                            backgroundColor: 'rgba(248, 113, 113, 0.15)',
-                            borderColor: 'rgba(248, 113, 113, 0.9)',
-                            pointBackgroundColor: '#F87171',
-                            pointBorderColor: '#0B0F1A',
-                            pointBorderWidth: 2,
-                            borderWidth: 2
-                        },
-                        {
-                            label: 'Nuova (Athletic Power)',
-                            data: [8, 4, 3, 9, 9, 8],
-                            backgroundColor: 'rgba(163, 230, 53, 0.18)',
-                            borderColor: 'rgba(163, 230, 53, 1)',
-                            pointBackgroundColor: '#A3E635',
-                            pointBorderColor: '#0B0F1A',
-                            pointBorderWidth: 2,
-                            borderWidth: 2
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        r: {
-                            angleLines: { color: 'rgba(255,255,255,0.08)' },
-                            grid:       { color: 'rgba(255,255,255,0.08)' },
-                            pointLabels: {
-                                font: { size: 11, family: "'Inter', sans-serif", weight: '600' },
-                                color: '#94A3B8'
-                            },
-                            ticks: { display: false, min: 0, max: 10 }
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                padding: 16,
-                                color: '#CBD5E1',
-                                font: { family: "'Inter', sans-serif", size: 12, weight: '500' },
-                                boxWidth: 14, boxHeight: 14, usePointStyle: true
-                            }
-                        },
-                        tooltip: {
-                            backgroundColor: '#1A2030',
-                            borderColor: '#2A3348',
-                            borderWidth: 1,
-                            titleColor: '#F1F5F9',
-                            bodyColor: '#CBD5E1',
-                            padding: 12,
-                            callbacks: {
-                                label: (c) => ` ${c.dataset.label}: ${c.formattedValue}/10`
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // ----- INIT -----
-        window.onload = () => {
-            loadProgram(currentActiveProgramId);
-            switchView('overview');
-        };
-
-        // ----- PWA: Service Worker registration -----
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
-                    .catch((err) => console.warn('Service Worker non registrato:', err));
+                    .catch(err => console.warn('Service Worker non registrato:', err));
             });
         }
     </script>

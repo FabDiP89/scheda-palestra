@@ -2,7 +2,7 @@
 // Strategia: app-shell cache-first per gli asset statici,
 // network-first con fallback offline per i documenti HTML.
 
-const CACHE_VERSION = 'powerhub-v1';
+const CACHE_VERSION = 'powerhub-v2';
 const APP_SHELL = [
     './',
     './index.html',
@@ -12,7 +12,6 @@ const APP_SHELL = [
     './icon-maskable.png',
     './apple-touch-icon.png',
     'https://cdn.tailwindcss.com',
-    'https://cdn.jsdelivr.net/npm/chart.js',
     'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap'
 ];
 
