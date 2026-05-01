@@ -313,7 +313,9 @@
             bolt: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>',
             plus: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
             calendar: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
-            trash: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>'
+            trash: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>',
+            book: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>',
+            external: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3 h-3"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>'
         };
 
         // ============================================================
@@ -412,6 +414,48 @@
                     ['Push Press',                '+1 - 2,5 kg'],
                     ['Landmine Press',            '+1 - 2 kg per lato'],
                     ['Panca esplosiva',           'aumenta solo se la velocità resta alta']
+                ]
+            },
+
+            sources: {
+                intro: 'Queste fonti non vanno lette come ricetta rigida, ma come base per le scelte della scheda.',
+                items: [
+                    {
+                        ref: 'ACSM',
+                        title: 'Resistance Training Guidelines Update 2026',
+                        desc: 'Le linee guida distinguono tra carichi più pesanti per la forza e carichi moderati per la potenza, con enfasi sulla massima velocità concentrica.',
+                        url: 'https://www.acsm.org/resistance-training-guidelines-update-2026/'
+                    },
+                    {
+                        ref: 'NSCA',
+                        title: 'Plyometric Exercises',
+                        desc: 'Nella pliometria "di più" non è automaticamente meglio: frequenza bassa, basso volume e padronanza tecnica sono spesso preferibili.',
+                        url: 'https://www.nsca.com/education/articles/kinetic-select/plyometric-exercises/'
+                    },
+                    {
+                        ref: 'Grgic et al.',
+                        title: 'Resistance training to failure or non-failure (meta-analisi)',
+                        desc: 'Il cedimento muscolare non sembra necessario per ottenere miglioramenti di forza e massa.',
+                        url: 'https://www.sciencedirect.com/science/article/pii/S2095254621000077'
+                    },
+                    {
+                        ref: 'Jukic et al.',
+                        title: 'Velocity loss thresholds during resistance training (meta-analisi)',
+                        desc: 'Per un blocco di potenza, limitare il calo di velocità durante le serie è coerente con l\'obiettivo.',
+                        url: 'https://pmc.ncbi.nlm.nih.gov/articles/PMC9807551/'
+                    },
+                    {
+                        ref: 'Xu et al.',
+                        title: 'Optimizing Post-activation Performance Enhancement (meta-analisi)',
+                        desc: 'Il PAPE / contrast training può migliorare acutamente prestazioni atletiche, ma l\'effetto dipende da carico, recupero e qualità del warm-up.',
+                        url: 'https://link.springer.com/article/10.1007/s40279-024-02170-6'
+                    },
+                    {
+                        ref: 'Gouttebarge et al.',
+                        title: 'Prevention of musculoskeletal injuries in volleyball',
+                        desc: 'Nel volley i programmi preventivi includono core stability, forza, equilibrio e warm-up strutturato.',
+                        url: 'https://link.springer.com/article/10.1186/s40621-017-0122-y'
+                    }
                 ]
             },
 
@@ -1044,6 +1088,29 @@
                     <div class="card-elevated p-5 text-center">
                         <p class="text-sm text-accent font-bold tracking-wider uppercase">Fresco sì. Leggero no.</p>
                         <p class="text-xs text-ink-400 mt-1">Esplosivo sì. Caotico no. Misurabile sì. Distruttivo no.</p>
+                    </div>
+
+                    <!-- Fonti & razionale -->
+                    <div class="card p-5">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-accent">${Icon.book}</span>
+                            <h3 class="text-base font-bold text-ink-100">Fonti & razionale</h3>
+                        </div>
+                        <p class="text-xs text-ink-400 leading-relaxed mb-4">${program.sources.intro}</p>
+                        <ol class="space-y-3.5">
+                            ${program.sources.items.map((s, i) => `
+                                <li class="border-l-2 border-border pl-3 pt-0.5">
+                                    <div class="flex items-baseline gap-2 flex-wrap">
+                                        <span class="text-[10px] font-mono font-bold text-accent bg-accent-soft border border-accent/30 px-1.5 py-0.5 rounded leading-none flex-shrink-0">[${i + 1}]</span>
+                                        <a href="${s.url}" target="_blank" rel="noopener noreferrer" class="text-sm font-semibold text-ink-100 hover:text-accent inline-flex items-center gap-1.5 leading-snug">
+                                            <span>${s.ref} — ${s.title}</span>
+                                            <span class="text-ink-400 flex-shrink-0">${Icon.external}</span>
+                                        </a>
+                                    </div>
+                                    <p class="text-xs text-ink-300 leading-relaxed mt-1.5">${s.desc}</p>
+                                </li>
+                            `).join('')}
+                        </ol>
                     </div>
                 </section>
             `;
