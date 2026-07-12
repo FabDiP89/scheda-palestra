@@ -3,11 +3,11 @@ window.workoutPrograms = window.workoutPrograms || {};
 window.workoutPrograms['scheda-fase3'] = {
     id: 'fase_3_v1',
     name: 'Fase 3 — Forza, Potenza & Reattività',
-    version: '1.0',
+    version: '1.1',
     startDate: '13 Lug 2026',
     endDate: '5 Ott 2026',
     frequency: '3 sedute / settimana',
-    duration: '75-95 min',
+    duration: '80-100 min',
     sport: 'Beach Volley',
 
     heroLabel: 'Blocco in-season',
@@ -268,6 +268,19 @@ window.workoutPrograms['scheda-fase3'] = {
                     tips: [
                         { title: 'Esecuzione', html: '<ul><li>Ginocchio piegato per enfatizzare il soleo.</li><li>Range completo, pausa in alto.</li><li>Movimento controllato, niente rimbalzi.</li></ul>' }
                     ]
+                },
+                {
+                    id: 'f3_d1_core', name: 'Dead bug 90/90 con heel tap', sets: 3, reps: '6-8 per lato', rest: 60,
+                    intensity: 'Anti-estensione · controllo',
+                    videoLink: 'https://www.youtube.com/results?search_query=dead+bug+heel+tap+tutorial',
+                    tips: [
+                        { title: 'Esecuzione', html: '<ul><li>Supino con anche e ginocchia a circa 90°.</li><li>Braccia rilassate lungo i fianchi, così non carichi la spalla.</li><li>Espira, abbassa le costole e porta il bacino in lieve retroversione.</li><li>Tocca lentamente il pavimento con un tallone senza cambiare la posizione della schiena.</li><li>Torna al centro e alterna il lato (~2-3 s in discesa).</li></ul>' },
+                        { title: 'Quando finisce la serie', html: '<p>La ripetizione termina quando senti la zona lombare inarcarsi: non cercare un\'escursione maggiore perdendo il controllo. Svolgilo a fine seduta, così non preaffatica il tronco.</p>' }
+                    ],
+                    variants: [
+                        { title: 'Heel tap con una sola gamba', html: '<p>Prima alternativa: riduce il carico mantenendo il controllo lombo-pelvico.</p>' },
+                        { title: 'McGill curl-up', html: '<p>Seconda alternativa se il dead bug non è disponibile o comodo.</p>' }
+                    ]
                 }
             ]
         },
@@ -367,6 +380,19 @@ window.workoutPrograms['scheda-fase3'] = {
                         { title: 'Esecuzione', html: '<ul><li>Movimento controllato, bacino fermo.</li><li>Range tollerato senza dolore inguinale.</li><li>Nessuno slancio, ~2 reps in riserva.</li></ul>' },
                         { title: 'Perché questa scelta', html: '<p>Allena gli adduttori senza obbligarti a sostenere il peso del corpo sulla spalla, come accadrebbe nel Copenhagen plank.</p>' }
                     ]
+                },
+                {
+                    id: 'f3_d2_core', name: 'Reverse crunch a terra o su panca', sets: 3, reps: '10-12', rest: 60,
+                    intensity: 'RIR tecnico 2 · nessuno slancio',
+                    videoLink: 'https://www.youtube.com/results?search_query=reverse+crunch+tutorial',
+                    tips: [
+                        { title: 'Esecuzione', html: '<ul><li>Supino con anche e ginocchia piegate.</li><li>Espira e avvicina il bacino alle costole, sollevando appena il sacro.</li><li>"Arrotola" il bacino, non lanciare le ginocchia verso il petto.</li><li>Discesa lenta, una vertebra alla volta.</li><li>Mani lungo i fianchi, oppure afferra il bordo della panca solo se la spalla lo tollera.</li></ul>' },
+                        { title: 'Nota', html: '<p>Se senti soprattutto flessori dell\'anca o zona lombare, riduci il range e rallenta l\'eccentrica. Svolgilo a fine seduta.</p>' }
+                    ],
+                    variants: [
+                        { title: 'Crunch machine leggero', html: '<p>Prima alternativa con carico guidato e leggero.</p>' },
+                        { title: 'Heel slide con retroversione del bacino', html: '<p>Seconda alternativa a bassissimo impatto, focus sul controllo lombo-pelvico.</p>' }
+                    ]
                 }
             ]
         },
@@ -437,6 +463,19 @@ window.workoutPrograms['scheda-fase3'] = {
                     videoLink: 'https://www.youtube.com/results?search_query=single+arm+cable+row+tutorial',
                     tips: [
                         { title: 'Esecuzione', html: '<ul><li>Busto fermo, tira il gomito verso l\'anca.</li><li>Pausa breve in chiusura.</li><li>Controlla il ritorno, niente rotazione del tronco.</li></ul>' }
+                    ]
+                },
+                {
+                    id: 'f3_d3_core', name: 'Pallof hold al petto', sets: 3, reps: '20-30 s per lato', rest: 60,
+                    intensity: 'Anti-rotazione · tenuta stabile',
+                    videoLink: 'https://www.youtube.com/results?search_query=pallof+hold+tutorial+core',
+                    tips: [
+                        { title: 'Esecuzione', html: '<ul><li>Posizionati lateralmente rispetto al cavo o all\'elastico.</li><li>Porta la maniglia davanti allo sterno, gomiti vicini al corpo.</li><li>È una tenuta al petto (non una spinta), scelta per limitare il lavoro dinamico della spalla.</li><li>Piedi stabili, ginocchia morbide, glutei attivi, costole basse.</li><li>Resisti alla rotazione senza inclinarti verso il cavo, respira lentamente.</li></ul>' },
+                        { title: 'Regola spalla', html: '<p>Se compare fastidio alla spalla, riduci la tensione oppure sostituisci con dead bug 90/90 3×8 per lato e segnalalo al fisioterapista. Svolgilo a fine seduta.</p>' }
+                    ],
+                    variants: [
+                        { title: 'Dead bug 90/90', html: '<p>Prima alternativa se il Pallof dà fastidio alla spalla.</p>' },
+                        { title: 'Suitcase carry', html: '<p>Seconda alternativa, solo se la spalla lo tollera.</p>' }
                     ]
                 }
             ]
