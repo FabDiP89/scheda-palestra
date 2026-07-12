@@ -1,6 +1,10 @@
 window.workoutPrograms = window.workoutPrograms || {};
 
 window.programRegistry = {
+    'scheda-fase3': {
+        label: 'Fase 3 — Forza & Potenza',
+        file: './schede/scheda-fase3.js'
+    },
     'scheda-esplosivita': {
         label: 'Scheda esplosivita',
         file: './schede/scheda-esplosivita.js'
@@ -15,4 +19,4 @@ window.programRegistry = {
     }
 };
 
-window.defaultProgramId = 'scheda-esplosivita';
+window.defaultProgramId = 'scheda-fase3';

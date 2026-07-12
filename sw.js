@@ -2,11 +2,12 @@
 // Strategia: app-shell cache-first per gli asset statici,
 // network-first con fallback offline per i documenti HTML.
 
-const CACHE_VERSION = 'powerhub-v5';
+const CACHE_VERSION = 'powerhub-v6';
 const APP_SHELL = [
     './',
     './index.html',
     './schede/registry.js',
+    './schede/scheda-fase3.js',
     './schede/scheda-esplosivita.js',
     './schede/scheda-cuscinetto.js',
     './schede/scheda-emergenza.js',
