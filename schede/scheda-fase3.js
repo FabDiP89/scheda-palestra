@@ -349,11 +349,13 @@ window.workoutPrograms['scheda-fase3'] = {
                     ]
                 },
                 {
-                    id: 'f3_d2_tbar', name: 'T-Bar Row chest-supported', sets: 3, reps: '6-8', rest: 105,
+                    id: 'f3_d2_tbar', name: 'T-Bar Row classico (Landmine Row)', sets: 3, reps: '6-8', rest: 105,
                     intensity: 'RIR 2',
-                    videoLink: 'https://www.youtube.com/results?search_query=chest+supported+t+bar+row+tutorial',
+                    videoLink: 'https://www.youtube.com/results?search_query=landmine+t+bar+row+tutorial',
                     tips: [
-                        { title: 'Esecuzione', html: '<ul><li>Torace sempre appoggiato.</li><li>Presa neutra o semi-pronata tollerata.</li><li>Evita di "strappare" il carico.</li><li>Pausa breve in chiusura.</li><li>Mantieni ~2 reps in riserva.</li></ul>' }
+                        { title: 'Esecuzione', html: '<ul><li>Hip hinge: anca indietro, schiena neutra, ginocchia poco flesse.</li><li>Brace del core e costole basse: senza appoggio è il tronco a stabilizzare, proteggi la lombare.</li><li>Presa neutra o semi-pronata.</li><li>Tira la maniglia/bilanciere verso le costole basse, gomiti verso le anche.</li><li>Pausa breve in chiusura, discesa controllata.</li></ul>' },
+                        { title: 'Cosa evitare', html: '<ul><li>Non "strappare" il carico né usare slancio del tronco.</li><li>Non perdere la neutralità lombare per aggiungere peso.</li><li>Mantieni ~2 reps in riserva.</li></ul>' },
+                        { title: 'Nota', html: '<p>Variante scelta perché in palestra non è disponibile il T-Bar con appoggio del torace. Poiché la schiena non è supportata, tieni il carico gestibile e la tecnica pulita.</p>' }
                     ]
                 },
                 {
