@@ -1,6 +1,10 @@
 window.workoutPrograms = window.workoutPrograms || {};
 
 window.programRegistry = {
+    'scheda-fase4': {
+        label: 'Fase 4 — Off-season Forza & Robustezza',
+        file: './schede/scheda-fase4.js'
+    },
     'scheda-fase3': {
         label: 'Fase 3 — Forza & Potenza',
         file: './schede/scheda-fase3.js'
@@ -19,4 +23,4 @@ window.programRegistry = {
     }
 };
 
-window.defaultProgramId = 'scheda-fase3';
+window.defaultProgramId = 'scheda-fase4';
