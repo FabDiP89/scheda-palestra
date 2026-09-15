@@ -205,6 +205,47 @@ window.workoutPrograms['scheda-fase4'] = {
         note: 'Pesante sì, a cedimento no · Pochi salti e buoni · Spalla robusta, non fragile.'
     },
 
+    // GIF dimostrative a 180×180. I tutorial restano solo dove il gesto del
+    // catalogo non è perfettamente sovrapponibile o serve più contesto.
+    exerciseMedia: {
+        baseUrl: 'https://raw.githubusercontent.com/hasaneyldrm/exercises-dataset/7455efae41b330c265e7cd4b78dfa848e7ce5ebd/',
+        attribution: '© Gym visual',
+        attributionUrl: 'https://gymvisual.com/',
+        noticeUrl: 'https://github.com/hasaneyldrm/exercises-dataset/blob/main/NOTICE.md',
+        gifs: {
+            f4_d1_squat:    { path: 'videos/0043-qXTaZnJ.gif', label: 'Barbell Full Squat' },
+            f4_d1_rdl:      { path: 'videos/0085-wQ2c4XD.gif', label: 'Barbell Romanian Deadlift' },
+            f4_d1_bulgaro:  { path: 'videos/0410-qx4fgX7.gif', label: 'Dumbbell Single Leg Split Squat' },
+            f4_d1_calf:     { path: 'videos/1373-bJYHBIN.gif', label: 'Bodyweight Standing Calf Raise' },
+            f4_d1_abwheel:  { path: 'videos/0857-NAgVB3t.gif', label: 'Wheel Rollout' },
+
+            f4_d2_w3:       { path: 'videos/0235-FWdVhcW.gif', label: 'Cable Standing Shoulder External Rotation' },
+            f4_d2_w4:       { path: 'videos/3021-jV65tKx.gif', label: 'Scapula Push-up' },
+            f4_d2_inclinata:{ path: 'videos/0324-OVLmUuL.gif', label: 'Dumbbell Incline Palm-in Press' },
+            f4_d2_rematore: { path: 'videos/0327-7vG5o25.gif', label: 'Dumbbell Incline Row' },
+            f4_d2_military: { path: 'videos/0404-f1jf47L.gif', label: 'Dumbbell Seated Shoulder Press (parallel grip)' },
+            f4_d2_lat:      { path: 'videos/0652-lBDjFxJ.gif', label: 'Pull-up', keepTutorial: true },
+            f4_d2_alzate:   { path: 'videos/0334-DsgkuIt.gif', label: 'Dumbbell Lateral Raise', keepTutorial: true },
+            f4_d2_extra:    { path: 'videos/0235-FWdVhcW.gif', label: 'Cable Standing Shoulder External Rotation' },
+            f4_d2_pushdown: { path: 'videos/0200-dU605di.gif', label: 'Cable Pushdown with Rope Attachment' },
+
+            f4_d3_front:    { path: 'videos/0042-zG0zs85.gif', label: 'Barbell Front Squat' },
+            f4_d3_stacco:   { path: 'videos/0032-ila4NZS.gif', label: 'Barbell Deadlift' },
+            f4_d3_stepup:   { path: 'videos/0431-aXtJhlg.gif', label: 'Dumbbell Step-up' },
+            f4_d3_legcurl:  { path: 'videos/0599-Zg3XY7P.gif', label: 'Lever Seated Leg Curl' },
+            f4_d3_soleo:    { path: 'videos/0594-bOOdeyc.gif', label: 'Lever Seated Calf Raise' },
+
+            f4_d4_w2:       { path: 'videos/0235-FWdVhcW.gif', label: 'Cable Standing Shoulder External Rotation' },
+            f4_d4_panca:    { path: 'videos/0025-EIeI8Vf.gif', label: 'Barbell Bench Press' },
+            f4_d4_rematore: { path: 'videos/0292-C0MA9bC.gif', label: 'Dumbbell One Arm Bent-over Row' },
+            f4_d4_lat:      { path: 'videos/2330-LEprlgG.gif', label: 'Cable Lat Pulldown (full range of motion)', keepTutorial: true },
+            f4_d4_intra:    { path: 'videos/0216-YPoVrBi.gif', label: 'Cable Seated Shoulder Internal Rotation' },
+            f4_d4_extra:    { path: 'videos/0235-FWdVhcW.gif', label: 'Cable Standing Shoulder External Rotation' },
+            f4_d4_curl:     { path: 'videos/0294-NbVPDMW.gif', label: 'Dumbbell Biceps Curl' },
+            f4_d4_chop:     { path: 'videos/0862-fhZQPlV.gif', label: 'Cable Twist Up-Down', keepTutorial: true }
+        }
+    },
+
     days: {
         // ============================================================
         //  GIORNO 1 — Lower A · Forza

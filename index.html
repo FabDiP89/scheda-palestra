@@ -212,6 +212,13 @@
             color: #A3E635;
         }
 
+        .exercise-gif {
+            width: 180px;
+            height: 180px;
+            object-fit: cover;
+            background: #F8FAFC;
+        }
+
         /* Accordion */
         .accordion-btn[aria-expanded="true"] .accordion-chevron { transform: rotate(180deg); }
         .accordion-chevron { transition: transform 0.2s ease; }
@@ -854,6 +861,41 @@
                 const infoBtn = ex.tips ? `<button onclick="event.stopPropagation(); openTipsModal('${ex.id}')" aria-label="Info ${ex.name}" class="pressable w-9 h-9 rounded-lg bg-elevated border border-border text-ink-300 hover:text-accent hover:border-accent/40 flex items-center justify-center flex-shrink-0">${Icon.info}</button>` : '';
                 const alertBtn = ex.variants ? `<button onclick="event.stopPropagation(); openVariantsModal('${ex.id}')" aria-label="Varianti ${ex.name}" class="pressable w-9 h-9 rounded-lg bg-warn-soft border border-warn/30 text-warn hover:bg-warn/20 flex items-center justify-center flex-shrink-0">${Icon.alert}</button>` : '';
 
+                const mediaConfig = program.exerciseMedia;
+                const gif = mediaConfig?.gifs?.[ex.id];
+                const gifHtml = gif ? `
+                    <figure class="w-fit max-w-full">
+                        <div class="rounded-xl overflow-hidden border border-border bg-white">
+                            <img src="${mediaConfig.baseUrl}${gif.path}"
+                                 alt="Dimostrazione animata: ${gif.label}"
+                                 width="180" height="180" loading="lazy" decoding="async"
+                                 class="exercise-gif"
+                                 onerror="this.closest('figure').classList.add('hidden'); this.closest('[data-exercise-media]').querySelector('[data-gif-fallback]')?.classList.replace('hidden', 'inline-flex')">
+                        </div>
+                        <figcaption class="mt-2 text-[10px] leading-relaxed text-ink-400 max-w-[180px]">
+                            Riferimento: ${gif.label}<br>
+                            <a href="${mediaConfig.attributionUrl}" target="_blank" rel="noopener noreferrer" class="hover:text-accent underline underline-offset-2">${mediaConfig.attribution}</a>
+                            <span aria-hidden="true"> · </span>
+                            <a href="${mediaConfig.noticeUrl}" target="_blank" rel="noopener noreferrer" class="hover:text-accent underline underline-offset-2">licenza media</a>
+                        </figcaption>
+                    </figure>
+                ` : '';
+                const showVideo = ex.videoLink && (!gif || gif.keepTutorial);
+                const videoHtml = ex.videoLink ? `
+                    <a href="${ex.videoLink}" target="_blank" rel="noopener noreferrer"
+                       ${gif && !showVideo ? 'data-gif-fallback' : ''}
+                       class="pressable ${showVideo ? 'inline-flex' : 'hidden'} items-center justify-center gap-2 w-full sm:w-auto bg-elevated hover:bg-deep border border-border hover:border-danger/40 text-ink-100 hover:text-danger px-4 py-2.5 rounded-xl font-semibold text-sm">
+                        <span class="text-danger">${Icon.play}</span>
+                        ${gif ? 'Tutorial dettagliato su YouTube' : 'Tutorial su YouTube'}
+                    </a>
+                ` : '';
+                const mediaHtml = gif ? `
+                    <div data-exercise-media class="flex flex-col sm:flex-row sm:items-center gap-4">
+                        ${gifHtml}
+                        ${videoHtml}
+                    </div>
+                ` : videoHtml;
+
                 return `
                     <article id="ex-card-${ex.id}" class="card overflow-hidden ${isComplete ? 'set-complete' : ''}">
                         <div role="button" tabindex="0" class="w-full text-left p-4 pressable cursor-pointer" onclick="toggleDetails('${ex.id}')" aria-expanded="false" aria-controls="details-${ex.id}">
@@ -879,11 +921,7 @@
                         </div>
 
                         <div id="details-${ex.id}" class="hidden border-t border-border bg-deep/40 px-4 py-4 space-y-4">
-                            <a href="${ex.videoLink}" target="_blank" rel="noopener noreferrer"
-                               class="pressable inline-flex items-center justify-center gap-2 w-full sm:w-auto bg-elevated hover:bg-deep border border-border hover:border-danger/40 text-ink-100 hover:text-danger px-4 py-2.5 rounded-xl font-semibold text-sm">
-                                <span class="text-danger">${Icon.play}</span>
-                                Tutorial su YouTube
-                            </a>
+                            ${mediaHtml}
 
                             ${!ex.isWarmup ? `
                                 <!-- Carico -->
